@@ -1,4 +1,4 @@
-package com.kolmir.fitnes_tracker;
+package com.kolmir.fitness_tracker;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
