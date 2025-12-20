@@ -11,10 +11,10 @@
 	</parent>
 	
 	<groupId>com.kolmir</groupId>
-	<artifactId>fitnes_tracker</artifactId>
+	<artifactId>fitness_tracker</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>fitnes_tracker</name>
-	<description>Demo project for Spring Boot</description>
+	<description>Backend for fitness tracker</description>
 	
 	<properties>
 		<maven.compiler.source>17</maven.compiler.source>

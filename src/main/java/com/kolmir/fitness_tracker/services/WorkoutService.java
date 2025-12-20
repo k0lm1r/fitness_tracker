@@ -1,8 +1,5 @@
 package com.kolmir.fitness_tracker.services;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

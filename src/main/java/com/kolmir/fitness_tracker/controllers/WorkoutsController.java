@@ -14,8 +14,6 @@ import com.kolmir.fitness_tracker.utils.workout.WorkoutNotValidException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;

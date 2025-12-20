@@ -1,9 +1,10 @@
 package com.kolmir.fitness_tracker.controllersTest;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -15,19 +16,30 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kolmir.fitness_tracker.controllers.WorkoutsController;
 import com.kolmir.fitness_tracker.dto.WorkoutDTO;
+import com.kolmir.fitness_tracker.dto.WorkoutFilter;
+import com.kolmir.fitness_tracker.models.User;
 import com.kolmir.fitness_tracker.models.Workout;
 import com.kolmir.fitness_tracker.services.WorkoutService;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @WebMvcTest(WorkoutsController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class WorkoutControllerTest {
 
     @Autowired
@@ -40,29 +52,6 @@ class WorkoutControllerTest {
     private WorkoutService workoutService;
 
     @Test
-    void index_ShouldReturnWorkoutList() throws Exception {
-        Workout firstWorkout = new Workout();
-        Workout secondWorkout = new Workout();
-
-        WorkoutDTO firstDto = new WorkoutDTO();
-        firstDto.setName("Morning Run");
-        firstDto.setCalories(300);
-
-        WorkoutDTO secondDto = new WorkoutDTO();
-        secondDto.setName("Evening Yoga");
-        secondDto.setCalories(120);
-
-        when(workoutService.getAllByOwnerId()).thenReturn(List.of(firstWorkout, secondWorkout));
-        when(workoutService.entityToDTO(firstWorkout)).thenReturn(firstDto);
-        when(workoutService.entityToDTO(secondWorkout)).thenReturn(secondDto);
-
-        mockMvc.perform(get("/workouts"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("Morning Run"))
-                .andExpect(jsonPath("$[1].calories").value(120));
-    }
-
-    @Test
     void getById_ShouldReturnWorkoutDTO() throws Exception {
         Workout workout = new Workout();
         workout.setId(1L);
@@ -73,7 +62,8 @@ class WorkoutControllerTest {
         when(workoutService.getById(1L)).thenReturn(workout);
         when(workoutService.entityToDTO(workout)).thenReturn(dto);
 
-        mockMvc.perform(get("/workouts/{id}", 1L))
+        mockMvc.perform(get("/workouts/{id}", 1L)
+                        .with(authentication(authenticatedUser())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.calories").value(15));
     }
@@ -93,6 +83,7 @@ class WorkoutControllerTest {
         when(workoutService.entityToDTO(entity)).thenReturn(responseDto);
 
         mockMvc.perform(post("/workouts")
+                        .with(authentication(authenticatedUser()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto)))
                 .andExpect(status().isCreated())
@@ -115,6 +106,7 @@ class WorkoutControllerTest {
         when(workoutService.entityToDTO(entity)).thenReturn(responseDto);
 
         mockMvc.perform(put("/workouts/{id}", 5L)
+                        .with(authentication(authenticatedUser()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto)))
                 .andExpect(status().isOk())
@@ -124,8 +116,42 @@ class WorkoutControllerTest {
 
     @Test
     void delete_ShouldReturnNoContent() throws Exception {
-        mockMvc.perform(delete("/workouts/{id}", 7L))
+        mockMvc.perform(delete("/workouts/{id}", 7L)
+                        .with(authentication(authenticatedUser())))
                 .andExpect(status().isNoContent());
+
+        verify(workoutService).delete(anyLong());
+    }
+
+    @Test
+    void getAllWithFilters_ShouldReturnPagedWorkouts() throws Exception {
+        User user = new User();
+        user.setId(1L);
+
+        Workout workout1 = new Workout();
+        Workout workout2 = new Workout();
+
+        WorkoutDTO dto1 = new WorkoutDTO();
+        dto1.setName("Morning Run");
+        WorkoutDTO dto2 = new WorkoutDTO();
+        dto2.setName("Evening Yoga");
+
+        Page<Workout> page = new PageImpl<>(List.of(workout1, workout2), PageRequest.of(0, 20), 2);
+
+        when(workoutService.getAllByOwnerId(any(WorkoutFilter.class), any(Pageable.class)))
+                .thenReturn(page);
+        when(workoutService.entityToDTO(workout1)).thenReturn(dto1);
+        when(workoutService.entityToDTO(workout2)).thenReturn(dto2);
+
+        mockMvc.perform(get("/workouts")
+                        .with(authentication(new UsernamePasswordAuthenticationToken(user, null))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].name").value("Morning Run"))
+                .andExpect(jsonPath("$.content[1].name").value("Evening Yoga"));
+
+        ArgumentCaptor<WorkoutFilter> filterCaptor = ArgumentCaptor.forClass(WorkoutFilter.class);
+        verify(workoutService).getAllByOwnerId(filterCaptor.capture(), any(Pageable.class));
+        assertEquals(1L, filterCaptor.getValue().getOwnerId());
     }
 
     private WorkoutDTO buildRequestDto() {
@@ -137,5 +163,11 @@ class WorkoutControllerTest {
         workoutDTO.setOwnerId(1L);
         workoutDTO.setWorkoutDate(LocalDateTime.now().plusDays(1));
         return workoutDTO;
+    }
+
+    private UsernamePasswordAuthenticationToken authenticatedUser() {
+        User user = new User();
+        user.setId(1L);
+        return new UsernamePasswordAuthenticationToken(user, null);
     }
 }

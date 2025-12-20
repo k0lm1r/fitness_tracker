@@ -1,6 +1,5 @@
 package com.kolmir.fitness_tracker.models;
 
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -13,14 +12,12 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Getter @Setter
-@Table(name = "categories")
-public class Category {
+@Setter @Getter
+@Table(name = "images")
+public class Image {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    private String name;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "owner_id")

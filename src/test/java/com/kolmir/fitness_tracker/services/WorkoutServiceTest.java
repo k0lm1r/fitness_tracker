@@ -3,7 +3,6 @@ package com.kolmir.fitness_tracker.services;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -17,8 +16,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import com.kolmir.fitness_tracker.dto.WorkoutDTO;
+import com.kolmir.fitness_tracker.dto.WorkoutFilter;
 import com.kolmir.fitness_tracker.models.Category;
 import com.kolmir.fitness_tracker.models.User;
 import com.kolmir.fitness_tracker.models.Workout;
@@ -53,6 +56,7 @@ class WorkoutServiceTest {
         Workout result = workoutService.getById(1L);
 
         assertSame(workout, result);
+        verify(workoutRepository).findById(1L);
     }
 
     @Test
@@ -60,6 +64,7 @@ class WorkoutServiceTest {
         when(workoutRepository.findById(5L)).thenReturn(Optional.empty());
 
         assertThrows(WorkoutNotFoundException.class, () -> workoutService.getById(5L));
+        verify(workoutRepository).findById(5L);
     }
 
     @Test
@@ -68,6 +73,7 @@ class WorkoutServiceTest {
 
         workoutService.delete(3L);
 
+        verify(workoutRepository).deleteById(3L);
     }
 
     @Test
@@ -75,28 +81,31 @@ class WorkoutServiceTest {
         when(workoutRepository.findById(9L)).thenReturn(Optional.empty());
 
         assertThrows(WorkoutNotFoundException.class, () -> workoutService.delete(9L));
+        verify(workoutRepository).findById(9L);
     }
 
     @Test
-    void filterByOrder_WhenDesc_UsesDateDescending() {
-        List<Workout> workouts = List.of(new Workout());
-        when(workoutRepository.findAllByOrderByWorkoutDateDesc()).thenReturn(workouts);
+    void getAllByOwnerId_ReturnsPageFromRepository() {
+        WorkoutFilter filter = new WorkoutFilter();
+        filter.setOwnerId(1L);
+        Pageable pageable = PageRequest.of(0, 10);
+        List<Workout> workouts = List.of(new Workout(), new Workout());
+        Page<Workout> page = new PageImpl<>(workouts, pageable, workouts.size());
 
-        List<Workout> result = workoutService.filterByOrder(true);
+        Page<Workout> result = workoutService.getAllByOwnerId(filter, pageable);
 
-        assertSame(workouts, result);
-        verify(workoutRepository).findAllByOrderByWorkoutDateDesc();
+        assertSame(page, result);
+        assertEquals(2, result.getTotalElements());
     }
 
     @Test
-    void filterByOrder_WhenAsc_UsesCaloriesAscending() {
-        List<Workout> workouts = List.of(new Workout());
-        when(workoutRepository.findAllByOrderByCaloriesAsc()).thenReturn(workouts);
+    void update_ShouldSetIdAndSave() {
+        Workout workout = new Workout();
 
-        List<Workout> result = workoutService.filterByOrder(false);
+        workoutService.update(5L, workout);
 
-        assertSame(workouts, result);
-        verify(workoutRepository).findAllByOrderByCaloriesAsc();
+        assertEquals(5L, workout.getId());
+        verify(workoutRepository).save(workout);
     }
 
     @Test

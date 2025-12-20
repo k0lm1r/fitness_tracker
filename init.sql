@@ -1,0 +1,23 @@
+CREATE TABLE IF NOT EXISTS workouts (
+    id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    category_id INT REFERENCES categories(id) ON DELETE SET NULL,
+    name VARCHAR(100) NOT NULL,
+    owner_id INT REFERENCES users(id) ON DELETE SET NULL,
+    workout_date DATE NOT NULL CHECK(workout_date <= CURRENT_DATE),
+    duration_minutes INT NOT NULL CHECK(duration_minutes > 0),
+    calories INT NOT NULL CHECK(calories > 0)
+)
+
+CREATE TABLE IF NOT EXISTS categories (
+    id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    name VARCHAR(50) NOT NULL,
+    owner_id INT REFERENCES users(id) ON DELETE SET NULL
+)
+
+CREATE TABLE IF NOT EXISTS users (
+    id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    username VARCHAR(50) NOT NULL UNIQUE CHECK(CHAR_LENGTH(username) > 0),
+    password VARCHAR(100) NOT NULL CHECK(CHAR_LENGTH(password) > 3),
+    email VARCHAR(50) NOT NULL UNIQUE
+)
+
