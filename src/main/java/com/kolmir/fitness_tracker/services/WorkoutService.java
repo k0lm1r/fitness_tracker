@@ -4,14 +4,19 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.kolmir.fitness_tracker.dto.WorkoutDTO;
+import com.kolmir.fitness_tracker.dto.WorkoutFilter;
 import com.kolmir.fitness_tracker.models.Workout;
 import com.kolmir.fitness_tracker.repository.CategoryRepository;
 import com.kolmir.fitness_tracker.repository.UserRepository;
 import com.kolmir.fitness_tracker.repository.WorkoutRepository;
+import com.kolmir.fitness_tracker.repository.WorkoutSpecifications;
 import com.kolmir.fitness_tracker.utils.workout.WorkoutNotFoundException;
 
 import lombok.RequiredArgsConstructor;
@@ -25,9 +30,9 @@ public class WorkoutService {
     private final ModelMapper modelMapper;
 
     @Transactional(readOnly = true)
-    public List<Workout> getAllByOwnerId() {
-        //TODO Test realisation
-        return workoutRepository.findAll();
+    public Page<Workout> getAllByOwnerId(WorkoutFilter workoutFilter, Pageable pageable) {
+        Specification<Workout> specification = WorkoutSpecifications.withFilter(workoutFilter);
+        return workoutRepository.findAll(specification, pageable);        
     }
 
     @Transactional(readOnly = true)
@@ -35,33 +40,6 @@ public class WorkoutService {
         return workoutRepository.findById(id).orElseThrow(
             () -> new WorkoutNotFoundException("Тренеровка с таким id не найдена.")
         );
-    }
-
-    @Transactional(readOnly = true)
-    public List<Workout> filterByCategoryName(String name) {
-        return workoutRepository.findByCategoryName(name);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Workout> filterByDuration(Integer min, Integer max) {
-        return workoutRepository.findByDurationMinutesBetween(min, max);
-    }
-
-    @Transactional(readOnly = true) 
-    public List<Workout> filterByOrder(boolean isDesc) {
-        return isDesc ? workoutRepository.findAllByOrderByWorkoutDateDesc() :
-                workoutRepository.findAllByOrderByCaloriesAsc();
-    }
-
-    @Transactional(readOnly = true)
-    public List<Workout> filterByCalories(boolean isDesc) {
-        return isDesc ? workoutRepository.findAllByOrderByCaloriesDesc() :
-                workoutRepository.findAllByOrderByCaloriesAsc();
-    }
-
-    @Transactional(readOnly = true)
-    public List<Workout> filterByWorkoutDate(LocalDateTime start, LocalDateTime end) {
-        return workoutRepository.findAllByWorkoutDate(start, end);
     }
 
     @Transactional

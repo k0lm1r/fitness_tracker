@@ -4,6 +4,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kolmir.fitness_tracker.dto.WorkoutDTO;
+import com.kolmir.fitness_tracker.dto.WorkoutFilter;
+import com.kolmir.fitness_tracker.models.User;
 import com.kolmir.fitness_tracker.services.WorkoutService;
 import com.kolmir.fitness_tracker.utils.ErrorResponse;
 import com.kolmir.fitness_tracker.utils.workout.WorkoutNotFoundException;
@@ -14,8 +16,11 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,11 +36,14 @@ public class WorkoutsController {
     private final WorkoutService workoutService;
 
     @GetMapping
-    public List<WorkoutDTO> index() {
-        //TODO Test realisation
-        return workoutService.getAllByOwnerId().stream()
-            .map(w -> workoutService.entityToDTO(w))
-            .toList();
+    public Page<WorkoutDTO> getAllWithFilters(
+                @AuthenticationPrincipal User user, 
+                WorkoutFilter workoutFilter, 
+                Pageable pageable) {
+        
+        workoutFilter.setOwnerId(user.getId());
+        return workoutService.getAllByOwnerId(workoutFilter, pageable)
+                .map(workoutService::entityToDTO);
     }
 
     @GetMapping("/{id}")

@@ -2,9 +2,9 @@ package com.kolmir.fitness_tracker.dto;
 
 import java.time.LocalDateTime;
 
-import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -25,7 +25,7 @@ public class WorkoutDTO {
     Long ownerId;
 
     @NotNull(message = "поле даты тренировки не может быть пустым")
-    @FutureOrPresent(message = "дата тренировки не может быть в прошлом")
+    @PastOrPresent(message = "дата тренировки не может быть в будущем")
     LocalDateTime workoutDate;
 
     @NotNull(message = "длительность должна содержать значение")
