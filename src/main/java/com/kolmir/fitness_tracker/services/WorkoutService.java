@@ -58,23 +58,25 @@ public class WorkoutService {
     @Transactional
     @PreAuthorize("@workoutRepository.existsByIdAndOwnerId(#id, authentication.principal.id)")
     public void delete(Long id) throws WorkoutNotFoundException {
-        workoutRepository.findById(id).orElseThrow(
-            () -> new WorkoutNotFoundException("невозможно удалить несуществующую тренировку")
-        );
+        if (workoutRepository.existsById(id))
+            throw new WorkoutNotFoundException("невозможно удалить несуществующую тренировку");
         workoutRepository.deleteById(id);
     }
 
     public Workout DTOtoEntity(WorkoutDTO workoutDTO) {
         Workout workout = modelMapper.map(workoutDTO, Workout.class);
         
-        workout.setCategory(categoryRepository.getReferenceById(workoutDTO.getCategoryId()));
+        if (workoutDTO.getCategoryId() != null)
+            workout.setCategory(categoryRepository.getReferenceById(workoutDTO.getCategoryId()));
 
         return workout;
     }
 
     public WorkoutDTO entityToDTO(Workout workout) {
         WorkoutDTO workoutDTO = modelMapper.map(workout, WorkoutDTO.class);
-        workoutDTO.setCategoryId(workout.getCategory().getId());
+            
+        if (workout.getCategory() != null)
+            workoutDTO.setCategoryId(workout.getCategory().getId());
 
         return workoutDTO;
     }
