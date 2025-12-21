@@ -1,7 +1,6 @@
 package com.kolmir.fitness_tracker.controllers;
 
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kolmir.fitness_tracker.dto.CategoryDTO;
@@ -28,25 +27,31 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/categories")
+@Tag(name = "Categories", description = "CRUD операции с категориями тренировок")
 public class CategoryController {
 
     private final CategoryService categoryService;
 
     @GetMapping
+    @Operation(summary = "Получить список категорий текущего пользователя")
     public List<CategoryDTO> getAll(@AuthenticationPrincipal User user) {
         return categoryService.getAll(user.getId()).stream().map(categoryService::entityToDTO).toList();
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<?> getById(@RequestParam Long id) throws CategoryNotFoundException {
+    @Operation(summary = "Получить категорию по id")
+    public ResponseEntity<?> getById(@PathVariable Long id) throws CategoryNotFoundException {
         return ResponseEntity.ok(categoryService.entityToDTO(categoryService.getById(id)));
     }
 
     @PostMapping
+    @Operation(summary = "Создать новую категорию")
     public ResponseEntity<?> create(@RequestBody @Valid CategoryDTO categoryDTO, BindingResult bindingResult) throws CategoryNotValidException {
         if (bindingResult.hasErrors())
             throw new CategoryNotValidException(ErrorResponse.getExceptionMessage(bindingResult));
@@ -56,6 +61,7 @@ public class CategoryController {
     }
     
     @PutMapping("/{id}")
+    @Operation(summary = "Обновить категорию по id")
     public ResponseEntity<CategoryDTO> update(
                     @PathVariable Long id, 
                     @Valid @RequestBody CategoryDTO categoryDTO,
@@ -70,6 +76,7 @@ public class CategoryController {
     }
     
     @DeleteMapping("/{id}")
+    @Operation(summary = "Удалить категорию по id")
     public ResponseEntity<Void> delete(@PathVariable Long id) throws CategoryNotFoundException {
         categoryService.delete(id);
         return ResponseEntity.noContent().build();

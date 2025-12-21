@@ -58,7 +58,7 @@ public class WorkoutService {
     @Transactional
     @PreAuthorize("@workoutRepository.existsByIdAndOwnerId(#id, authentication.principal.id)")
     public void delete(Long id) throws WorkoutNotFoundException {
-        if (workoutRepository.existsById(id))
+        if (!workoutRepository.existsById(id))
             throw new WorkoutNotFoundException("невозможно удалить несуществующую тренировку");
         workoutRepository.deleteById(id);
     }

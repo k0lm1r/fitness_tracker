@@ -3,11 +3,11 @@ package com.kolmir.fitness_tracker.repository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale.Category;
 
 import org.springframework.data.jpa.domain.Specification;
 
 import com.kolmir.fitness_tracker.dto.WorkoutFilter;
+import com.kolmir.fitness_tracker.models.Category;
 import com.kolmir.fitness_tracker.models.Workout;
 
 import jakarta.persistence.criteria.Join;
@@ -29,11 +29,9 @@ public class WorkoutSpecifications {
 
     private static Specification<Workout> hasCategory(String categoryName) {
         return (root, query, cb) -> {
-            Join<Workout, Category> rootJoin = null;
-
             if (categoryName != null) {
-                rootJoin = root.join("categories");
-                return cb.equal(rootJoin.get("category"), categoryName);
+                Join<Workout, Category> rootJoin = root.join("category");
+                return cb.equal(rootJoin.get("name"), categoryName);
             }
 
             return cb.and();

@@ -54,7 +54,7 @@ public class CategoryService {
     @Transactional
     @PreAuthorize("@categoryRepository.existsByIdAndOwnerId(#id, authentication.principal.id)")
     public void delete(Long id) throws CategoryNotFoundException {
-        if (categoryRepository.existsById(id))
+        if (!categoryRepository.existsById(id))
             throw new CategoryNotFoundException("невозможно удалить несуществующую категорию");
         categoryRepository.deleteById(id);
     }

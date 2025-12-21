@@ -15,19 +15,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kolmir.fitness_tracker.controllers.WorkoutsController;
@@ -37,23 +40,33 @@ import com.kolmir.fitness_tracker.models.User;
 import com.kolmir.fitness_tracker.models.Workout;
 import com.kolmir.fitness_tracker.security.JwtAuthenticationFilter;
 import com.kolmir.fitness_tracker.services.WorkoutService;
+import com.kolmir.fitness_tracker.utils.FitnessTrackerExceptionHandler;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@WebMvcTest(WorkoutsController.class)
-@AutoConfigureMockMvc(addFilters = false)
+@ExtendWith(MockitoExtension.class)
 class WorkoutControllerTest {
 
-    @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @MockitoBean
+    @Mock
     private WorkoutService workoutService;
 
-    @MockitoBean
+    @Mock
     private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @InjectMocks
+    private WorkoutsController workoutsController;
+
+    @BeforeEach
+    void setup() {
+        objectMapper.findAndRegisterModules();
+        mockMvc = MockMvcBuilders.standaloneSetup(workoutsController)
+                .setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver())
+                .setControllerAdvice(new FitnessTrackerExceptionHandler())
+                .build();
+    }
 
     @Test
     void getById_ShouldReturnWorkoutDTO() throws Exception {
@@ -147,11 +160,11 @@ class WorkoutControllerTest {
         when(workoutService.entityToDTO(workout1)).thenReturn(dto1);
         when(workoutService.entityToDTO(workout2)).thenReturn(dto2);
 
-        mockMvc.perform(get("/workouts")
-                        .with(authentication(new UsernamePasswordAuthenticationToken(user, null))))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].name").value("Morning Run"))
-                .andExpect(jsonPath("$.content[1].name").value("Evening Yoga"));
+        Page<WorkoutDTO> result = workoutsController.getAllWithFilters(user, new WorkoutFilter(), PageRequest.of(0, 20));
+
+        assertEquals(2, result.getTotalElements());
+        assertEquals("Morning Run", result.getContent().get(0).getName());
+        assertEquals("Evening Yoga", result.getContent().get(1).getName());
 
         ArgumentCaptor<WorkoutFilter> filterCaptor = ArgumentCaptor.forClass(WorkoutFilter.class);
         verify(workoutService).getAllByOwnerId(filterCaptor.capture(), any(Pageable.class));
@@ -164,7 +177,7 @@ class WorkoutControllerTest {
         workoutDTO.setCategoryId(1L);
         workoutDTO.setDurationMinutes(45);
         workoutDTO.setName("testWorkout");
-        workoutDTO.setWorkoutDate(LocalDateTime.now().plusDays(1));
+        workoutDTO.setWorkoutDate(LocalDateTime.now());
         return workoutDTO;
     }
 

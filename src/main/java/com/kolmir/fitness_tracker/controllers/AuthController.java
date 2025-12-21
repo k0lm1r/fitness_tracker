@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import com.kolmir.fitness_tracker.dto.JwtResponse;
 import com.kolmir.fitness_tracker.dto.RefreshTokenRequest;
 import com.kolmir.fitness_tracker.dto.UserLoginRequest;
@@ -26,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
+@Tag(name = "Auth", description = "Аутентификация и управление токенами")
 public class AuthController {
 
     private final ModelMapper modelMapper;
@@ -34,6 +38,7 @@ public class AuthController {
     private final UserService userService;
 
     @PostMapping("/login")
+    @Operation(summary = "Вход по логину и паролю", description = "Возвращает access и refresh токены")
     public ResponseEntity<?> signin(@RequestBody UserLoginRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
@@ -45,6 +50,7 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
+    @Operation(summary = "Обновить access токен по refresh токену")
     public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest request) throws JwtNotValidException {
         String refreshToken = request.getRefreshToken();
 
@@ -59,6 +65,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
+    @Operation(summary = "Регистрация пользователя", description = "Создаёт пользователя и возвращает токены")
     public ResponseEntity<?> signup(@Valid @RequestBody UserRegisterRequest request) throws UsernameAlreadyExistsException, EmailAlreadyInUseException {
         userService.createUser(modelMapper.map(request, User.class));
 

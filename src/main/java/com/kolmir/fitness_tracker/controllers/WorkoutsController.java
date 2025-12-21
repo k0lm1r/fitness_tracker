@@ -27,13 +27,18 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/workouts")
+@Tag(name = "Workouts", description = "Управление тренировками")
 public class WorkoutsController {
     private final WorkoutService workoutService;
 
     @GetMapping
+    @Operation(summary = "Получить тренировки с фильтрами и пагинацией")
     public Page<WorkoutDTO> getAllWithFilters(
                 @AuthenticationPrincipal User user, 
                 WorkoutFilter workoutFilter, 
@@ -45,11 +50,13 @@ public class WorkoutsController {
     }
 
     @GetMapping("/{id}")
-    public WorkoutDTO getById(@PathVariable Long id) throws WorkoutNotFoundException {
-        return workoutService.entityToDTO(workoutService.getById(id));
+    @Operation(summary = "Получить тренировку по id")
+    public ResponseEntity<WorkoutDTO> getById(@PathVariable Long id) throws WorkoutNotFoundException {
+        return new ResponseEntity<>(workoutService.entityToDTO(workoutService.getById(id)), HttpStatus.OK);
     }
     
     @PostMapping
+    @Operation(summary = "Создать новую тренировку")
     public ResponseEntity<WorkoutDTO> create(
                     @Valid @RequestBody WorkoutDTO workoutDTO, 
                     BindingResult bindingResult) throws WorkoutNotValidException {
@@ -64,6 +71,7 @@ public class WorkoutsController {
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Обновить тренировку по id")
     public ResponseEntity<WorkoutDTO> update(
                     @PathVariable Long id, 
                     @Valid @RequestBody WorkoutDTO workoutDTO,
@@ -78,6 +86,7 @@ public class WorkoutsController {
     }
     
     @DeleteMapping("/{id}")
+    @Operation(summary = "Удалить тренировку по id")
     public ResponseEntity<Void> delete(@PathVariable Long id) throws WorkoutNotFoundException {
         workoutService.delete(id);
         return ResponseEntity.noContent().build();
