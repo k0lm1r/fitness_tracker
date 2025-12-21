@@ -56,8 +56,10 @@ public class WorkoutsController {
         
         if (bindingResult.hasErrors())
             throw new WorkoutNotValidException(ErrorResponse.getExceptionMessage(bindingResult));
+
         WorkoutDTO createdWorkout = workoutService.entityToDTO(
                 workoutService.save(workoutService.DTOtoEntity(workoutDTO)));
+        
         return new ResponseEntity<>(createdWorkout, HttpStatus.CREATED);
     }
 

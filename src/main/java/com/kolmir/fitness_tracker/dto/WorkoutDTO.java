@@ -20,10 +20,6 @@ public class WorkoutDTO {
     @Size(min = 1, max = 100, message = "длина названия должна быть от 1 до 100 символов")
     String name;
 
-    @NotNull(message = "id владельца не может быть пустым")
-    @Positive(message = "id владельца должен быть больше 0")
-    Long ownerId;
-
     @NotNull(message = "поле даты тренировки не может быть пустым")
     @PastOrPresent(message = "дата тренировки не может быть в будущем")
     LocalDateTime workoutDate;

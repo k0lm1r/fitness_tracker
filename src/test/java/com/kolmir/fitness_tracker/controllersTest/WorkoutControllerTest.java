@@ -35,6 +35,7 @@ import com.kolmir.fitness_tracker.dto.WorkoutDTO;
 import com.kolmir.fitness_tracker.dto.WorkoutFilter;
 import com.kolmir.fitness_tracker.models.User;
 import com.kolmir.fitness_tracker.models.Workout;
+import com.kolmir.fitness_tracker.security.JwtAuthenticationFilter;
 import com.kolmir.fitness_tracker.services.WorkoutService;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -50,6 +51,9 @@ class WorkoutControllerTest {
 
     @MockitoBean
     private WorkoutService workoutService;
+
+    @MockitoBean
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Test
     void getById_ShouldReturnWorkoutDTO() throws Exception {
@@ -160,7 +164,6 @@ class WorkoutControllerTest {
         workoutDTO.setCategoryId(1L);
         workoutDTO.setDurationMinutes(45);
         workoutDTO.setName("testWorkout");
-        workoutDTO.setOwnerId(1L);
         workoutDTO.setWorkoutDate(LocalDateTime.now().plusDays(1));
         return workoutDTO;
     }

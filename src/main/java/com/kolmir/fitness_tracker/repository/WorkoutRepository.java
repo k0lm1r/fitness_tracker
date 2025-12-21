@@ -9,6 +9,6 @@ import com.kolmir.fitness_tracker.models.Workout;
 @Repository
 public interface WorkoutRepository extends JpaRepository<Workout, Long>, 
                 JpaSpecificationExecutor<Workout> {
- 
     
+    public boolean existsByIdAndOwnerId(Long id, Long ownerId);
 }
