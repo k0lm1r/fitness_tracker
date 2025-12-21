@@ -9,5 +9,7 @@ import com.kolmir.fitness_tracker.models.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-    Optional<User> getUserByUsername(String username);
+    public Optional<User> getUserByUsername(String username);
+    public boolean existsByUsername(String username);
+    public boolean existsByEmail(String email);
 }
