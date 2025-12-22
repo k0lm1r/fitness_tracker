@@ -81,6 +81,26 @@
 
 **ВАЖНО!** Реализация должна находиться на **приватном** репозитории, на который необходимо добавить <code>modsen-mentor</code> аккаунт
 
+## Запуск
+
+### Через Docker Compose
+1. Собрать и поднять сервисы: 
+   <code>docker compose up --build -d</code>
+2. Проверить логи backend: 
+   <code>docker compose logs -f backend</code>
+3. Остановить и удалить контейнеры: 
+   <code>docker compose down -v</code>
+
+### Локально (без контейнера)
+1. Поднять PostgreSQL (можно через compose только для БД): `
+   <code>docker compose up -d db</code>
+2. Собрать и запустить приложение:
+   <code>./mvnw spring-boot:run</code>
+Windows:
+   <code>mvnw.cmd spring-boot:run</code>
+3. По умолчанию приложение слушает порт `8080`, 
+БД — <code>jdbc:postgresql://localhost:5432/fitness_tracker</code>
+
 ## Полезные источники
 - [Java](https://metanit.com/java/tutorial/)
 - [Hibernate](https://hibernate.org/orm/documentation/7.1/)
