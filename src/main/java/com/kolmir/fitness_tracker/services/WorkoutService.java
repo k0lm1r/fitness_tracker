@@ -50,8 +50,10 @@ public class WorkoutService {
 
     @Transactional
     @PreAuthorize("#workout.owner.id == authentication.principal.id")
-    public Workout update(Long id, Workout workout) {
+    public Workout update(Long id, Workout workout) throws WorkoutNotFoundException {
         workout.setId(id);
+        if (!workoutRepository.existsById(id))
+            throw new WorkoutNotFoundException("невозможно обновить несуществующую тренировку");
         return workoutRepository.save(workout);
     }
 
