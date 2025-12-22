@@ -21,7 +21,7 @@ public class WorkoutDTO {
     String name;
 
     @NotNull(message = "поле даты тренировки не может быть пустым")
-    @PastOrPresent(message = "дата тренировки не может быть в будущем")
+    @PastOrPresent(message = "дата тренировки не может быть в прошлом")
     LocalDateTime workoutDate;
 
     @NotNull(message = "длительность должна содержать значение")

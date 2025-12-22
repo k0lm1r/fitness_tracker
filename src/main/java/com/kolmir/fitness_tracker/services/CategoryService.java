@@ -46,8 +46,12 @@ public class CategoryService {
 
     @Transactional
     @PreAuthorize("@categoryRepository.existsByIdAndOwnerId(#id, authentication.principal.id)")
-    public Category update(Long id, Category category) {
+    public Category update(Long id, Category category) throws CategoryNotFoundException {
         category.setId(id);
+
+        if (!categoryRepository.existsById(id))
+            throw new CategoryNotFoundException("невозможно обновить несуществующую категорию");
+        
         return categoryRepository.save(category);
     }
 

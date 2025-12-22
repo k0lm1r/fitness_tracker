@@ -101,7 +101,7 @@ class CategoryServiceTest {
     }
 
     @Test
-    void update_SetsIdAndPersists() {
+    void update_SetsIdAndPersists() throws CategoryNotFoundException {
         Category category = new Category();
 
         when(categoryRepository.save(category)).thenReturn(category);

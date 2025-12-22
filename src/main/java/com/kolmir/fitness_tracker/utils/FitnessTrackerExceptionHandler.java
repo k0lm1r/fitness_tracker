@@ -9,6 +9,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.kolmir.fitness_tracker.utils.category.CategoryNotFoundException;
+import com.kolmir.fitness_tracker.utils.category.CategoryNotValidException;
 import com.kolmir.fitness_tracker.utils.jwt.JwtNotValidException;
 import com.kolmir.fitness_tracker.utils.user.EmailAlreadyInUseException;
 import com.kolmir.fitness_tracker.utils.user.UserNotValidException;
@@ -19,13 +21,13 @@ import com.kolmir.fitness_tracker.utils.workout.WorkoutNotValidException;
 @RestControllerAdvice
 public class FitnessTrackerExceptionHandler {
     @ExceptionHandler(WorkoutNotFoundException.class)
-    ResponseEntity<ErrorResponse> handleException(WorkoutNotFoundException e) {
+    ResponseEntity<ErrorResponse> handleWorkoutNotFoundException(WorkoutNotFoundException e) {
         ErrorResponse errorResponse = new ErrorResponse(e.getMessage(), LocalDateTime.now());
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(WorkoutNotValidException.class)
-    ResponseEntity<ErrorResponse> handleException(WorkoutNotValidException e) {
+    ResponseEntity<ErrorResponse> handleWorkoutNotValidException(WorkoutNotValidException e) {
         ErrorResponse errorResponse = new ErrorResponse(e.getMessage(), LocalDateTime.now());
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
@@ -43,31 +45,43 @@ public class FitnessTrackerExceptionHandler {
     }
 
     @ExceptionHandler(UsernameAlreadyExistsException.class)
-    public ResponseEntity<?> handleUsernameNotFound(UsernameAlreadyExistsException e) {
+    public ResponseEntity<?> handleUsernameAlreadyExistsException(UsernameAlreadyExistsException e) {
         ErrorResponse errorResponse = new ErrorResponse(e.getMessage(), LocalDateTime.now());
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(EmailAlreadyInUseException.class)
-    public ResponseEntity<?> handleUsernameNotFound(EmailAlreadyInUseException e) {
+    public ResponseEntity<?> handleEmailAlreadyInUserException(EmailAlreadyInUseException e) {
         ErrorResponse errorResponse = new ErrorResponse(e.getMessage(), LocalDateTime.now());
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(UserNotValidException.class)
-    public ResponseEntity<?> handleUsernameNotFound(UserNotValidException e) {
+    public ResponseEntity<?> handleUserNotValidException(UserNotValidException e) {
         ErrorResponse errorResponse = new ErrorResponse(e.getMessage(), LocalDateTime.now());
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(JwtNotValidException.class)
-    public ResponseEntity<?> handleUsernameNotFound(JwtNotValidException e) {
+    public ResponseEntity<?> handleJwtNotValidException(JwtNotValidException e) {
         ErrorResponse errorResponse = new ErrorResponse(e.getMessage(), LocalDateTime.now());
         return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
     }
+    
+    @ExceptionHandler(CategoryNotValidException.class)
+    public ResponseEntity<?> handleCategoryNotValidException(CategoryNotValidException e) {
+        ErrorResponse errorResponse = new ErrorResponse(e.getMessage(), LocalDateTime.now());
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(CategoryNotFoundException.class)
+    public ResponseEntity<?> handleCategoryNotFoundException(CategoryNotFoundException e) {
+        ErrorResponse errorResponse = new ErrorResponse(e.getMessage(), LocalDateTime.now());
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<?> handleUsernameNotFound(Exception e) {
+    public ResponseEntity<?> handleException(Exception e) {
         ErrorResponse errorResponse = new ErrorResponse(e.getMessage(), LocalDateTime.now());
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }

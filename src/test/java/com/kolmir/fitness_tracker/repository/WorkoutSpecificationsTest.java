@@ -20,6 +20,7 @@ import com.kolmir.fitness_tracker.models.Workout;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 
@@ -37,7 +38,7 @@ class WorkoutSpecificationsTest {
     private Predicate predicate;
 
     @Mock
-    private jakarta.persistence.criteria.Path<Object> anyPath;
+    private Path<Object> anyPath;
 
     @Mock
     private Join<Object, Object> join;
