@@ -134,7 +134,7 @@ class WorkoutServiceTest {
     }
 
     @Test
-    void update_ShouldSetIdAndSave() {
+    void update_ShouldSetIdAndSave() throws WorkoutNotFoundException {
         Workout workout = new Workout();
 
         workoutService.update(5L, workout);
