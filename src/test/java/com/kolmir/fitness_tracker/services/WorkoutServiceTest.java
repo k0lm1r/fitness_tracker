@@ -30,12 +30,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.kolmir.fitness_tracker.dto.WorkoutDTO;
 import com.kolmir.fitness_tracker.dto.WorkoutFilter;
+import com.kolmir.fitness_tracker.exceptions.WorkoutNotFoundException;
 import com.kolmir.fitness_tracker.models.Category;
 import com.kolmir.fitness_tracker.models.User;
 import com.kolmir.fitness_tracker.models.Workout;
 import com.kolmir.fitness_tracker.repository.CategoryRepository;
 import com.kolmir.fitness_tracker.repository.WorkoutRepository;
-import com.kolmir.fitness_tracker.utils.workout.WorkoutNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 class WorkoutServiceTest {

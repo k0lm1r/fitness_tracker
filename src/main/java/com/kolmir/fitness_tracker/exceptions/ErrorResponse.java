@@ -1,4 +1,4 @@
-package com.kolmir.fitness_tracker.utils;
+package com.kolmir.fitness_tracker.exceptions;
 
 import java.time.LocalDateTime;
 import java.util.List;

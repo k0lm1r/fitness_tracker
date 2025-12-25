@@ -11,7 +11,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.kolmir.fitness_tracker.dto.ImageDTO;
+import com.kolmir.fitness_tracker.dto.ImageResponce;
 import com.kolmir.fitness_tracker.models.Image;
 import com.kolmir.fitness_tracker.models.User;
 import com.kolmir.fitness_tracker.repository.ImageRepository;
@@ -54,8 +54,8 @@ public class ImageService {
         return filename;
     }
 
-    public ImageDTO entityToDTO(Image image) {
-        ImageDTO imageDTO = modelMapper.map(image, ImageDTO.class);
+    public ImageResponce entityToDTO(Image image) {
+        ImageResponce imageDTO = modelMapper.map(image, ImageResponce.class);
         imageDTO.setOwnerId(image.getOwner().getId());
         return imageDTO;
     }

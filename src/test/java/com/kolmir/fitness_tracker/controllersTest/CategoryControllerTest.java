@@ -26,10 +26,10 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kolmir.fitness_tracker.controllers.CategoryController;
 import com.kolmir.fitness_tracker.dto.CategoryDTO;
+import com.kolmir.fitness_tracker.exceptions.FitnessTrackerExceptionHandler;
 import com.kolmir.fitness_tracker.models.Category;
 import com.kolmir.fitness_tracker.models.User;
 import com.kolmir.fitness_tracker.services.CategoryService;
-import com.kolmir.fitness_tracker.utils.FitnessTrackerExceptionHandler;
 
 @ExtendWith(MockitoExtension.class)
 class CategoryControllerTest {

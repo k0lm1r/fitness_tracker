@@ -4,11 +4,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.kolmir.fitness_tracker.exceptions.EmailAlreadyInUseException;
+import com.kolmir.fitness_tracker.exceptions.UsernameAlreadyExistsException;
 import com.kolmir.fitness_tracker.models.User;
 import com.kolmir.fitness_tracker.repository.UserRepository;
-import com.kolmir.fitness_tracker.utils.user.EmailAlreadyInUseException;
-import com.kolmir.fitness_tracker.utils.user.UsernameAlreadyExistsException;
-
 import lombok.RequiredArgsConstructor;
 
 @Service

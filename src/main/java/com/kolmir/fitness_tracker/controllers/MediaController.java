@@ -5,6 +5,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.kolmir.fitness_tracker.dto.ImageResponce;
+import com.kolmir.fitness_tracker.exceptions.ErrorResponse;
 import com.kolmir.fitness_tracker.services.ImageService;
 
 import lombok.RequiredArgsConstructor;
@@ -38,11 +40,11 @@ public class MediaController {
             description = "Принимает multipart/form-data с файлом изображения и возвращает информацию о сохранённом файле. Требует Bearer JWT.",
             security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Файл загружен", content = @Content(schema = @Schema(implementation = com.kolmir.fitness_tracker.dto.ImageDTO.class))),
-            @ApiResponse(responseCode = "400", description = "Неверный формат файла", content = @Content(schema = @Schema(implementation = com.kolmir.fitness_tracker.utils.ErrorResponse.class))),
-            @ApiResponse(responseCode = "401", description = "Неавторизован", content = @Content(schema = @Schema(implementation = com.kolmir.fitness_tracker.utils.ErrorResponse.class))),
-            @ApiResponse(responseCode = "403", description = "Доступ запрещён", content = @Content(schema = @Schema(implementation = com.kolmir.fitness_tracker.utils.ErrorResponse.class))),
-            @ApiResponse(responseCode = "500", description = "Внутренняя ошибка", content = @Content(schema = @Schema(implementation = com.kolmir.fitness_tracker.utils.ErrorResponse.class)))
+            @ApiResponse(responseCode = "201", description = "Файл загружен", content = @Content(schema = @Schema(implementation = ImageResponce.class))),
+            @ApiResponse(responseCode = "400", description = "Неверный формат файла", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Неавторизован", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Доступ запрещён", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Внутренняя ошибка", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @io.swagger.v3.oas.annotations.parameters.RequestBody(required = true, content = @Content(mediaType = "multipart/form-data",
             schema = @Schema(type = "string", format = "binary"),

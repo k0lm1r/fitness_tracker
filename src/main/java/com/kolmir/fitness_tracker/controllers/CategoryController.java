@@ -4,11 +4,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kolmir.fitness_tracker.dto.CategoryDTO;
+import com.kolmir.fitness_tracker.exceptions.CategoryNotFoundException;
+import com.kolmir.fitness_tracker.exceptions.CategoryNotValidException;
+import com.kolmir.fitness_tracker.exceptions.ErrorResponse;
 import com.kolmir.fitness_tracker.models.User;
 import com.kolmir.fitness_tracker.services.CategoryService;
-import com.kolmir.fitness_tracker.utils.ErrorResponse;
-import com.kolmir.fitness_tracker.utils.category.CategoryNotFoundException;
-import com.kolmir.fitness_tracker.utils.category.CategoryNotValidException;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package com.kolmir.fitness_tracker.utils;
+package com.kolmir.fitness_tracker.exceptions;
 
 import java.time.LocalDateTime;
 
@@ -9,14 +9,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import com.kolmir.fitness_tracker.utils.category.CategoryNotFoundException;
-import com.kolmir.fitness_tracker.utils.category.CategoryNotValidException;
-import com.kolmir.fitness_tracker.utils.jwt.JwtNotValidException;
-import com.kolmir.fitness_tracker.utils.user.EmailAlreadyInUseException;
-import com.kolmir.fitness_tracker.utils.user.UserNotValidException;
-import com.kolmir.fitness_tracker.utils.user.UsernameAlreadyExistsException;
-import com.kolmir.fitness_tracker.utils.workout.WorkoutNotFoundException;
-import com.kolmir.fitness_tracker.utils.workout.WorkoutNotValidException;
+
 
 @RestControllerAdvice
 public class FitnessTrackerExceptionHandler {

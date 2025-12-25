@@ -22,11 +22,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.kolmir.fitness_tracker.dto.CategoryDTO;
+import com.kolmir.fitness_tracker.exceptions.CategoryNotFoundException;
 import com.kolmir.fitness_tracker.models.Category;
 import com.kolmir.fitness_tracker.models.User;
 import com.kolmir.fitness_tracker.repository.CategoryRepository;
 import com.kolmir.fitness_tracker.repository.UserRepository;
-import com.kolmir.fitness_tracker.utils.category.CategoryNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 class CategoryServiceTest {

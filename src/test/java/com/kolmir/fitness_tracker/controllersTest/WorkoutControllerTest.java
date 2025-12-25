@@ -36,11 +36,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kolmir.fitness_tracker.controllers.WorkoutsController;
 import com.kolmir.fitness_tracker.dto.WorkoutDTO;
 import com.kolmir.fitness_tracker.dto.WorkoutFilter;
+import com.kolmir.fitness_tracker.exceptions.FitnessTrackerExceptionHandler;
 import com.kolmir.fitness_tracker.models.User;
 import com.kolmir.fitness_tracker.models.Workout;
 import com.kolmir.fitness_tracker.security.JwtAuthenticationFilter;
 import com.kolmir.fitness_tracker.services.WorkoutService;
-import com.kolmir.fitness_tracker.utils.FitnessTrackerExceptionHandler;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)

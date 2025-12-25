@@ -1,4 +1,4 @@
-package com.kolmir.fitness_tracker.utils.user;
+package com.kolmir.fitness_tracker.exceptions;
 
 public class UsernameAlreadyExistsException extends Exception {
     public UsernameAlreadyExistsException(String message) {

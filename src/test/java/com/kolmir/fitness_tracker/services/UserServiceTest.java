@@ -11,10 +11,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.kolmir.fitness_tracker.exceptions.EmailAlreadyInUseException;
+import com.kolmir.fitness_tracker.exceptions.UsernameAlreadyExistsException;
 import com.kolmir.fitness_tracker.models.User;
 import com.kolmir.fitness_tracker.repository.UserRepository;
-import com.kolmir.fitness_tracker.utils.user.EmailAlreadyInUseException;
-import com.kolmir.fitness_tracker.utils.user.UsernameAlreadyExistsException;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {

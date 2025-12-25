@@ -21,13 +21,13 @@ import com.kolmir.fitness_tracker.dto.JwtResponse;
 import com.kolmir.fitness_tracker.dto.RefreshTokenRequest;
 import com.kolmir.fitness_tracker.dto.UserLoginRequest;
 import com.kolmir.fitness_tracker.dto.UserRegisterRequest;
+import com.kolmir.fitness_tracker.exceptions.EmailAlreadyInUseException;
+import com.kolmir.fitness_tracker.exceptions.ErrorResponse;
+import com.kolmir.fitness_tracker.exceptions.JwtNotValidException;
+import com.kolmir.fitness_tracker.exceptions.UsernameAlreadyExistsException;
 import com.kolmir.fitness_tracker.models.User;
 import com.kolmir.fitness_tracker.security.JwtUtils;
 import com.kolmir.fitness_tracker.services.UserService;
-import com.kolmir.fitness_tracker.utils.ErrorResponse;
-import com.kolmir.fitness_tracker.utils.jwt.JwtNotValidException;
-import com.kolmir.fitness_tracker.utils.user.EmailAlreadyInUseException;
-import com.kolmir.fitness_tracker.utils.user.UsernameAlreadyExistsException;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

@@ -5,11 +5,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.kolmir.fitness_tracker.dto.WorkoutDTO;
 import com.kolmir.fitness_tracker.dto.WorkoutFilter;
+import com.kolmir.fitness_tracker.exceptions.ErrorResponse;
+import com.kolmir.fitness_tracker.exceptions.WorkoutNotFoundException;
+import com.kolmir.fitness_tracker.exceptions.WorkoutNotValidException;
 import com.kolmir.fitness_tracker.models.User;
 import com.kolmir.fitness_tracker.services.WorkoutService;
-import com.kolmir.fitness_tracker.utils.ErrorResponse;
-import com.kolmir.fitness_tracker.utils.workout.WorkoutNotFoundException;
-import com.kolmir.fitness_tracker.utils.workout.WorkoutNotValidException;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
