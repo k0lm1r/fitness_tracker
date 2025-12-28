@@ -10,6 +10,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.kolmir.fitness_tracker.dto.ImageMapper;
+import com.kolmir.fitness_tracker.dto.ImageResponce;
 import com.kolmir.fitness_tracker.models.Image;
 import com.kolmir.fitness_tracker.models.User;
 import com.kolmir.fitness_tracker.repository.ImageRepository;
@@ -22,8 +24,9 @@ public class ImageService {
 
     private final ImageRepository imageRepository;
     private final String UPLOAD_DIR = "images/";
+    private final ImageMapper imageMapper;
 
-    public Image upload(MultipartFile file) throws IOException {
+    public ImageResponce upload(MultipartFile file) throws IOException {
         String filename = saveImage(file);
         Image image = new Image();
         User user = (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -32,7 +35,7 @@ public class ImageService {
         image.setPath(Path.of(UPLOAD_DIR, filename).toString());
         image.setOwner(user);
 
-        return imageRepository.save(image);
+        return imageMapper.toDTO(imageRepository.save(image));
     }
 
     private void createUploadDirIfNotExists() {

@@ -1,8 +1,6 @@
 package com.kolmir.fitness_tracker.controllers;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,11 +22,7 @@ import com.kolmir.fitness_tracker.exceptions.EmailAlreadyInUseException;
 import com.kolmir.fitness_tracker.exceptions.ErrorResponse;
 import com.kolmir.fitness_tracker.exceptions.JwtNotValidException;
 import com.kolmir.fitness_tracker.exceptions.UsernameAlreadyExistsException;
-import com.kolmir.fitness_tracker.models.User;
-import com.kolmir.fitness_tracker.security.JwtUtils;
 import com.kolmir.fitness_tracker.services.AuthService;
-import com.kolmir.fitness_tracker.services.UserService;
-
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 

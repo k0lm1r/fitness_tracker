@@ -1,5 +1,8 @@
 package com.kolmir.fitness_tracker.services;
 
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,19 +15,9 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
-    @Transactional(readOnly = true)
-    public boolean isUsernameTaken(String username) {
-        return userRepository.existsByUsername(username);
-    }
-
-    @Transactional(readOnly = true)
-    public boolean isEmailTaken(String email) {
-        return userRepository.existsByEmail(email);
-    }
 
     @Transactional
     public void createUser(User user) throws UsernameAlreadyExistsException, EmailAlreadyInUseException {
@@ -35,5 +28,13 @@ public class UserService {
         
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
+    }
+
+    @Override 
+    @Transactional
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return userRepository.getUserByUsername(username).orElseThrow (
+                () -> new UsernameNotFoundException("пользователь с таким именем не найден")
+        );
     }
 }

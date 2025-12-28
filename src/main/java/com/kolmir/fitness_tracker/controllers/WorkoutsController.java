@@ -7,7 +7,6 @@ import com.kolmir.fitness_tracker.dto.WorkoutDTO;
 import com.kolmir.fitness_tracker.dto.WorkoutFilter;
 import com.kolmir.fitness_tracker.exceptions.ErrorResponse;
 import com.kolmir.fitness_tracker.exceptions.WorkoutNotFoundException;
-import com.kolmir.fitness_tracker.exceptions.WorkoutNotValidException;
 import com.kolmir.fitness_tracker.models.User;
 import com.kolmir.fitness_tracker.services.WorkoutService;
 
@@ -20,7 +19,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -62,8 +60,7 @@ public class WorkoutsController {
                 @ParameterObject Pageable pageable) {
         
         workoutFilter.setOwnerId(user.getId());
-        return workoutService.getAllByOwnerId(workoutFilter, pageable)
-                .map(workoutService::entityToDTO);
+        return workoutService.getAllByOwnerId(workoutFilter, pageable);
     }
 
     @GetMapping("/{id}")
@@ -79,7 +76,7 @@ public class WorkoutsController {
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public ResponseEntity<WorkoutDTO> getById(@PathVariable Long id) throws WorkoutNotFoundException {
-        return new ResponseEntity<>(workoutService.entityToDTO(workoutService.getById(id)), HttpStatus.OK);
+        return new ResponseEntity<>(workoutService.getById(id), HttpStatus.OK);
     }
     
     @PostMapping
@@ -108,16 +105,8 @@ public class WorkoutsController {
                             }
                             """)))
     public ResponseEntity<WorkoutDTO> create(
-                    @Valid @RequestBody WorkoutDTO workoutDTO, 
-                    BindingResult bindingResult) throws WorkoutNotValidException {
-        
-        if (bindingResult.hasErrors())
-            throw new WorkoutNotValidException(ErrorResponse.getExceptionMessage(bindingResult));
-
-        WorkoutDTO createdWorkout = workoutService.entityToDTO(
-                workoutService.save(workoutService.DTOtoEntity(workoutDTO)));
-        
-        return new ResponseEntity<>(createdWorkout, HttpStatus.CREATED);
+                    @Valid @RequestBody WorkoutDTO workoutDTO) {
+        return new ResponseEntity<>(workoutService.save(workoutDTO), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
@@ -148,15 +137,8 @@ public class WorkoutsController {
                             """)))
     public ResponseEntity<WorkoutDTO> update(
                     @PathVariable Long id, 
-                    @Valid @RequestBody WorkoutDTO workoutDTO,
-                    BindingResult bindingResult) throws WorkoutNotValidException, WorkoutNotFoundException {
-        
-        if (bindingResult.hasErrors()) 
-            throw new WorkoutNotValidException(ErrorResponse.getExceptionMessage(bindingResult));
-        
-        WorkoutDTO updatedWorkout = workoutService.entityToDTO(
-                workoutService.update(id, workoutService.DTOtoEntity(workoutDTO)));
-        return ResponseEntity.ok(updatedWorkout);
+                    @Valid @RequestBody WorkoutDTO workoutDTO) throws WorkoutNotFoundException {
+        return ResponseEntity.ok(workoutService.update(id, workoutDTO));
     }
     
     @DeleteMapping("/{id}")

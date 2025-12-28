@@ -12,7 +12,6 @@ import com.kolmir.fitness_tracker.dto.UserRegisterRequest;
 import com.kolmir.fitness_tracker.exceptions.EmailAlreadyInUseException;
 import com.kolmir.fitness_tracker.exceptions.JwtNotValidException;
 import com.kolmir.fitness_tracker.exceptions.UsernameAlreadyExistsException;
-import com.kolmir.fitness_tracker.models.User;
 import com.kolmir.fitness_tracker.security.JwtUtils;
 
 import lombok.RequiredArgsConstructor;

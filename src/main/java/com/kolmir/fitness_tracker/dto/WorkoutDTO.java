@@ -30,5 +30,7 @@ public class WorkoutDTO {
 
     @NotNull(message = "поле числа потраченных калорий не может быть пустым")
     @Positive(message = "число потраченных калорий должно быть больше 0")
-    private int calories;
+    private Integer calories;
+
+    private Long ownerId;
 }

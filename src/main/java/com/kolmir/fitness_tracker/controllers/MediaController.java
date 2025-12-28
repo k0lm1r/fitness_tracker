@@ -51,7 +51,7 @@ public class MediaController {
             examples = @ExampleObject(name = "Пример запроса", value = "(binary image file)")))
     public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file ) throws IOException {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(imageService.entityToDTO(imageService.upload(file)));
+                .body(imageService.upload(file));
     }
     
 }
