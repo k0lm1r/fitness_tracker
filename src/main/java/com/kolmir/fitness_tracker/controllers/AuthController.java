@@ -1,6 +1,5 @@
 package com.kolmir.fitness_tracker.controllers;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,6 +26,7 @@ import com.kolmir.fitness_tracker.exceptions.JwtNotValidException;
 import com.kolmir.fitness_tracker.exceptions.UsernameAlreadyExistsException;
 import com.kolmir.fitness_tracker.models.User;
 import com.kolmir.fitness_tracker.security.JwtUtils;
+import com.kolmir.fitness_tracker.services.AuthService;
 import com.kolmir.fitness_tracker.services.UserService;
 
 import jakarta.validation.Valid;
@@ -38,10 +38,7 @@ import lombok.RequiredArgsConstructor;
 @Tag(name = "Auth", description = "Аутентификация и управление токенами")
 public class AuthController {
 
-    private final ModelMapper modelMapper;
-    private final AuthenticationManager authenticationManager;
-    private final JwtUtils jwtUtils;
-    private final UserService userService;
+    private final AuthService authService;
 
     @PostMapping("/login")
     @Operation(
@@ -64,13 +61,7 @@ public class AuthController {
                             }
                             """)))
     public ResponseEntity<?> signin(@Valid @RequestBody UserLoginRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
-
-        String accessToken = jwtUtils.generateAccessToken(request.getUsername());
-        String refreshToken = jwtUtils.generateRefreshToken(request.getUsername());
-
-        return ResponseEntity.ok(new JwtResponse(accessToken, refreshToken));
+        return ResponseEntity.ok(authService.login(request));
     }
 
     @PostMapping("/refresh")
@@ -93,16 +84,7 @@ public class AuthController {
                             }
                             """)))
     public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest request) throws JwtNotValidException {
-        String refreshToken = request.getRefreshToken();
-
-        if (!jwtUtils.validateToken(refreshToken)) {
-            throw new JwtNotValidException("не валидный токен");
-        }
-
-        String username = jwtUtils.getUsernameFromToken(refreshToken);
-        String newAccessToken = jwtUtils.generateAccessToken(username);
-
-        return ResponseEntity.ok(new JwtResponse(newAccessToken, refreshToken));
+        return ResponseEntity.ok(authService.refreshToken(request));
     }
 
     @PostMapping("/register")
@@ -127,14 +109,6 @@ public class AuthController {
                             }
                             """)))
     public ResponseEntity<?> signup(@Valid @RequestBody UserRegisterRequest request) throws UsernameAlreadyExistsException, EmailAlreadyInUseException {
-        userService.createUser(modelMapper.map(request, User.class));
-
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
-
-        String accessToken = jwtUtils.generateAccessToken(request.getUsername());
-        String refreshToken = jwtUtils.generateRefreshToken(request.getUsername());
-
-        return ResponseEntity.ok(new JwtResponse(accessToken, refreshToken));
+        return ResponseEntity.ok(authService.register(request));
     }
 }

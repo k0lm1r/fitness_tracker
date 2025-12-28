@@ -5,9 +5,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.kolmir.fitness_tracker.dto.CategoryDTO;
 import com.kolmir.fitness_tracker.exceptions.CategoryNotFoundException;
-import com.kolmir.fitness_tracker.exceptions.CategoryNotValidException;
 import com.kolmir.fitness_tracker.exceptions.ErrorResponse;
-import com.kolmir.fitness_tracker.models.User;
 import com.kolmir.fitness_tracker.services.CategoryService;
 
 import jakarta.validation.Valid;
@@ -17,8 +15,6 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -54,8 +50,8 @@ public class CategoryController {
             @ApiResponse(responseCode = "403", description = "Доступ запрещён", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    public List<CategoryDTO> getAll(@AuthenticationPrincipal User user) {
-        return categoryService.getAll(user.getId()).stream().map(categoryService::entityToDTO).toList();
+    public List<CategoryDTO> getAll() {
+        return categoryService.getAll();
     }
     
     @GetMapping("/{id}")
@@ -71,7 +67,7 @@ public class CategoryController {
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public ResponseEntity<?> getById(@PathVariable Long id) throws CategoryNotFoundException {
-        return ResponseEntity.ok(categoryService.entityToDTO(categoryService.getById(id)));
+        return ResponseEntity.ok(categoryService.getById());
     }
 
     @PostMapping
@@ -96,12 +92,9 @@ public class CategoryController {
                               "name": "Кардио"
                             }
                             """)))
-    public ResponseEntity<?> create(@RequestBody @Valid CategoryDTO categoryDTO, BindingResult bindingResult) throws CategoryNotValidException {
-        if (bindingResult.hasErrors())
-            throw new CategoryNotValidException(ErrorResponse.getExceptionMessage(bindingResult));
-
+    public ResponseEntity<?> create(@RequestBody @Valid CategoryDTO categoryDTO) {
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(categoryService.entityToDTO(categoryService.save(categoryService.DTOtoEntity(categoryDTO)))); 
+            .body(categoryService.save(categoryDTO)); 
     }
     
     @PutMapping("/{id}")
@@ -128,14 +121,9 @@ public class CategoryController {
                             """)))
     public ResponseEntity<CategoryDTO> update(
                     @PathVariable Long id, 
-                    @Valid @RequestBody CategoryDTO categoryDTO,
-                    BindingResult bindingResult) throws CategoryNotValidException, CategoryNotFoundException {
+                    @Valid @RequestBody CategoryDTO categoryDTO) throws CategoryNotFoundException {
         
-        if (bindingResult.hasErrors()) 
-            throw new CategoryNotValidException(ErrorResponse.getExceptionMessage(bindingResult));
-        
-        CategoryDTO updatedcategory = categoryService.entityToDTO(
-                categoryService.update(id, categoryService.DTOtoEntity(categoryDTO)));
+        CategoryDTO updatedcategory = categoryService.update(id, categoryDTO);
         return ResponseEntity.ok(updatedcategory);
     }
     

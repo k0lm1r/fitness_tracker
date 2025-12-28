@@ -3,16 +3,14 @@ package com.kolmir.fitness_tracker.services;
 import java.util.List;
 
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.kolmir.fitness_tracker.dto.CategoryDTO;
+import com.kolmir.fitness_tracker.dto.CategoryMapper;
 import com.kolmir.fitness_tracker.exceptions.CategoryNotFoundException;
 import com.kolmir.fitness_tracker.models.Category;
-import com.kolmir.fitness_tracker.models.User;
 import com.kolmir.fitness_tracker.repository.CategoryRepository;
-import com.kolmir.fitness_tracker.repository.UserRepository;
 import com.kolmir.fitness_tracker.security.CurrentUserProvider;
 
 import lombok.RequiredArgsConstructor;
@@ -21,38 +19,39 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CategoryService {
 
-    private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
+    private final CategoryMapper categoryMapper;
 
     @Transactional(readOnly = true)
-    public List<Category> getAll() {
-        return categoryRepository.findAllByOwnerId(CurrentUserProvider.getCurrentUserId());
+    public List<CategoryDTO> getAll() {
+        return categoryRepository.findAllByOwnerId(CurrentUserProvider.getCurrentUserId()).stream()
+                    .map(categoryMapper::toDTO).toList();
     }
 
     @Transactional(readOnly = true)
     @PreAuthorize("@categoryRepository.existsByIdAndOwnerId(#id, authentication.principal.id)")
-    public Category getById() throws CategoryNotFoundException { 
-        return categoryRepository.findById(CurrentUserProvider.getCurrentUserId()).orElseThrow(() -> 
-                    new CategoryNotFoundException("Категория с таким id не найдена"));
+    public CategoryDTO getById() throws CategoryNotFoundException { 
+        return categoryMapper.toDTO(categoryRepository.findById(CurrentUserProvider.getCurrentUserId()).orElseThrow(() -> 
+                    new CategoryNotFoundException("Категория с таким id не найдена")));
     }
 
     @Transactional
-    public Category save(Category category) {
-        User owner = new User();
-        owner.setId(CurrentUserProvider.getCurrentUserId());
-        category.setOwner(owner);
-        return categoryRepository.save(category);
+    public CategoryDTO save(CategoryDTO categoryDTO) {
+        categoryDTO.setOwnerId(CurrentUserProvider.getCurrentUserId());
+        Category category = categoryMapper.toEntity(categoryDTO);
+        return categoryMapper.toDTO(categoryRepository.save(category));
     }
 
     @Transactional
     @PreAuthorize("@categoryRepository.existsByIdAndOwnerId(#id, authentication.principal.id)")
-    public Category update(Long id, Category category) throws CategoryNotFoundException {
+    public CategoryDTO update(Long id, CategoryDTO categoryDTO) throws CategoryNotFoundException {
+        Category category = categoryMapper.toEntity(categoryDTO);
         category.setId(id);
 
         if (!categoryRepository.existsById(id))
             throw new CategoryNotFoundException("невозможно обновить несуществующую категорию");
         
-        return categoryRepository.save(category);
+        return categoryMapper.toDTO(categoryRepository.save(category));
     }
 
     @Transactional
