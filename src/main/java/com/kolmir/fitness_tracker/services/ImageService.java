@@ -6,12 +6,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.kolmir.fitness_tracker.dto.ImageResponce;
 import com.kolmir.fitness_tracker.models.Image;
 import com.kolmir.fitness_tracker.models.User;
 import com.kolmir.fitness_tracker.repository.ImageRepository;
@@ -24,7 +22,6 @@ public class ImageService {
 
     private final ImageRepository imageRepository;
     private final String UPLOAD_DIR = "images/";
-    private final ModelMapper modelMapper;
 
     public Image upload(MultipartFile file) throws IOException {
         String filename = saveImage(file);
@@ -52,11 +49,5 @@ public class ImageService {
         Files.write(Path.of(UPLOAD_DIR, filename), imageBytes);
 
         return filename;
-    }
-
-    public ImageResponce entityToDTO(Image image) {
-        ImageResponce imageDTO = modelMapper.map(image, ImageResponce.class);
-        imageDTO.setOwnerId(image.getOwner().getId());
-        return imageDTO;
     }
 }

@@ -1,6 +1,5 @@
 package com.kolmir.fitness_tracker.services;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -25,7 +24,6 @@ import lombok.RequiredArgsConstructor;
 public class WorkoutService {
     private final WorkoutRepository workoutRepository;
     private final CategoryRepository categoryRepository;
-    private final ModelMapper modelMapper;
 
     @Transactional(readOnly = true)
     public Page<Workout> getAllByOwnerId(WorkoutFilter workoutFilter, Pageable pageable) {
@@ -63,23 +61,5 @@ public class WorkoutService {
         if (!workoutRepository.existsById(id))
             throw new WorkoutNotFoundException("невозможно удалить несуществующую тренировку");
         workoutRepository.deleteById(id);
-    }
-
-    public Workout DTOtoEntity(WorkoutDTO workoutDTO) {
-        Workout workout = modelMapper.map(workoutDTO, Workout.class);
-        
-        if (workoutDTO.getCategoryId() != null)
-            workout.setCategory(categoryRepository.getReferenceById(workoutDTO.getCategoryId()));
-
-        return workout;
-    }
-
-    public WorkoutDTO entityToDTO(Workout workout) {
-        WorkoutDTO workoutDTO = modelMapper.map(workout, WorkoutDTO.class);
-            
-        if (workout.getCategory() != null)
-            workoutDTO.setCategoryId(workout.getCategory().getId());
-
-        return workoutDTO;
     }
 }
