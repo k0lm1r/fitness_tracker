@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:latest
+    image: postgres:18
     container_name: fitness-db
     environment:
       POSTGRES_DB: fitness_db

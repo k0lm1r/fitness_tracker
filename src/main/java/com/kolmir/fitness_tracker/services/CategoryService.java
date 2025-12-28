@@ -30,8 +30,8 @@ public class CategoryService {
 
     @Transactional(readOnly = true)
     @PreAuthorize("@categoryRepository.existsByIdAndOwnerId(#id, authentication.principal.id)")
-    public CategoryDTO getById() throws CategoryNotFoundException { 
-        return categoryMapper.toDTO(categoryRepository.findById(CurrentUserProvider.getCurrentUserId()).orElseThrow(() -> 
+    public CategoryDTO getById(Long id) throws CategoryNotFoundException { 
+        return categoryMapper.toDTO(categoryRepository.findById(id).orElseThrow(() -> 
                     new CategoryNotFoundException("Категория с таким id не найдена")));
     }
 

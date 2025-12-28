@@ -2,6 +2,7 @@ package com.kolmir.fitness_tracker.services;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.kolmir.fitness_tracker.dto.JwtResponse;
@@ -12,6 +13,8 @@ import com.kolmir.fitness_tracker.dto.UserRegisterRequest;
 import com.kolmir.fitness_tracker.exceptions.EmailAlreadyInUseException;
 import com.kolmir.fitness_tracker.exceptions.JwtNotValidException;
 import com.kolmir.fitness_tracker.exceptions.UsernameAlreadyExistsException;
+import com.kolmir.fitness_tracker.models.User;
+import com.kolmir.fitness_tracker.repository.UserRepository;
 import com.kolmir.fitness_tracker.security.JwtUtils;
 
 import lombok.RequiredArgsConstructor;
@@ -24,6 +27,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
     private final UserMapper userMapper;
+    private final UserRepository userRepository;
 
     public JwtResponse login(UserLoginRequest request) {
         authenticationManager.authenticate(
@@ -58,5 +62,10 @@ public class AuthService {
         String refreshToken = jwtUtils.generateRefreshToken(request.getUsername());
 
         return new JwtResponse(accessToken, refreshToken);
+    }
+
+    public User loadUserByUsername(String username) {
+        return userRepository.getUserByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("пользователь с таким именем не найден"));
     }
 }

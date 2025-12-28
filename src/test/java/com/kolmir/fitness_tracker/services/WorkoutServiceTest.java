@@ -8,7 +8,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,7 +18,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -30,11 +28,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.kolmir.fitness_tracker.dto.WorkoutDTO;
 import com.kolmir.fitness_tracker.dto.WorkoutFilter;
+import com.kolmir.fitness_tracker.dto.WorkoutMapper;
 import com.kolmir.fitness_tracker.exceptions.WorkoutNotFoundException;
-import com.kolmir.fitness_tracker.models.Category;
 import com.kolmir.fitness_tracker.models.User;
 import com.kolmir.fitness_tracker.models.Workout;
-import com.kolmir.fitness_tracker.repository.CategoryRepository;
 import com.kolmir.fitness_tracker.repository.WorkoutRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,10 +41,7 @@ class WorkoutServiceTest {
     private WorkoutRepository workoutRepository;
 
     @Mock
-    private CategoryRepository categoryRepository;
-
-    @Mock
-    private ModelMapper modelMapper;
+    private WorkoutMapper workoutMapper;
 
     @InjectMocks
     private WorkoutService workoutService;
@@ -68,32 +62,39 @@ class WorkoutServiceTest {
     }
 
     @Test
-    void getAllByOwnerId_ReturnsPageFromRepository() {
+    void getAllByOwnerId_ReturnsMappedPage() {
         WorkoutFilter filter = new WorkoutFilter();
-        filter.setOwnerId(1L);
         Pageable pageable = PageRequest.of(0, 10);
-        List<Workout> workouts = List.of(new Workout(), new Workout());
-        Page<Workout> page = new PageImpl<>(workouts, pageable, workouts.size());
 
-        Specification<Workout> spec = any();
+        Workout workout1 = new Workout();
+        Workout workout2 = new Workout();
+        Page<Workout> page = new PageImpl<>(List.of(workout1, workout2), pageable, 2);
+        WorkoutDTO dto1 = new WorkoutDTO();
+        WorkoutDTO dto2 = new WorkoutDTO();
+        
+        when(workoutRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(page);
+        when(workoutMapper.toDTO(workout1)).thenReturn(dto1);
+        when(workoutMapper.toDTO(workout2)).thenReturn(dto2);
 
-        when(workoutRepository.findAll(spec, eq(pageable))).thenReturn(page);
+        Page<WorkoutDTO> result = workoutService.getAllByOwnerId(filter, pageable);
 
-        Page<Workout> result = workoutService.getAllByOwnerId(filter, pageable);
-
-        assertSame(page, result);
         assertEquals(2, result.getTotalElements());
-        verify(workoutRepository).findAll(spec, eq(pageable));
+        assertSame(dto1, result.getContent().get(0));
+        assertSame(dto2, result.getContent().get(1));
+        verify(workoutRepository).findAll(any(Specification.class), eq(pageable));
     }
 
     @Test
-    void getById_WhenWorkoutExists_ReturnsWorkout() throws WorkoutNotFoundException {
+    void getById_WhenWorkoutExists_ReturnsDto() throws WorkoutNotFoundException {
         Workout workout = new Workout();
+        WorkoutDTO dto = new WorkoutDTO();
+
         when(workoutRepository.findById(1L)).thenReturn(Optional.of(workout));
+        when(workoutMapper.toDTO(workout)).thenReturn(dto);
 
-        Workout result = workoutService.getById(1L);
+        WorkoutDTO result = workoutService.getById(1L);
 
-        assertSame(workout, result);
+        assertSame(dto, result);
         verify(workoutRepository).findById(1L);
     }
 
@@ -106,14 +107,40 @@ class WorkoutServiceTest {
     }
 
     @Test
-    void save_ShouldSetOwnerFromSecurityContext() {
-        Workout workout = new Workout();
-        when(workoutRepository.save(workout)).thenReturn(workout);
+    void save_ShouldSetOwnerAndReturnDto() {
+        WorkoutDTO dto = new WorkoutDTO();
+        dto.setName("Morning Run");
 
-        Workout result = workoutService.save(workout);
+        Workout entity = new Workout();
+        WorkoutDTO responseDto = new WorkoutDTO();
 
-        assertSame(authenticatedUser, result.getOwner());
-        verify(workoutRepository).save(workout);
+        when(workoutMapper.toEntity(dto)).thenReturn(entity);
+        when(workoutRepository.save(entity)).thenReturn(entity);
+        when(workoutMapper.toDTO(entity)).thenReturn(responseDto);
+
+        WorkoutDTO result = workoutService.save(dto);
+
+        assertSame(responseDto, result);
+        assertEquals(authenticatedUser.getId(), dto.getOwnerId());
+        verify(workoutRepository).save(entity);
+    }
+
+    @Test
+    void update_ShouldSetIdAndReturnDto() throws WorkoutNotFoundException {
+        WorkoutDTO dto = new WorkoutDTO();
+        Workout entity = new Workout();
+        WorkoutDTO responseDto = new WorkoutDTO();
+
+        when(workoutMapper.toEntity(dto)).thenReturn(entity);
+        when(workoutRepository.existsById(5L)).thenReturn(true);
+        when(workoutRepository.save(entity)).thenReturn(entity);
+        when(workoutMapper.toDTO(entity)).thenReturn(responseDto);
+
+        WorkoutDTO result = workoutService.update(5L, dto);
+
+        assertSame(responseDto, result);
+        assertEquals(5L, entity.getId());
+        verify(workoutRepository).existsById(5L);
     }
 
     @Test
@@ -131,69 +158,5 @@ class WorkoutServiceTest {
         workoutService.delete(3L);
 
         verify(workoutRepository).deleteById(3L);
-    }
-
-    @Test
-    void update_ShouldSetIdAndSave() throws WorkoutNotFoundException {
-        Workout workout = new Workout();
-
-        workoutService.update(5L, workout);
-
-        assertEquals(5L, workout.getId());
-        verify(workoutRepository).save(workout);
-    }
-
-    @Test
-    void DTOtoEntity_ShouldMapFieldsAndRelations() {
-        WorkoutDTO dto = new WorkoutDTO();
-        dto.setName("Cardio");
-        dto.setWorkoutDate(LocalDateTime.now());
-        dto.setDurationMinutes(30);
-        dto.setCalories(400);
-        dto.setCategoryId(2L);
-
-        Workout mappedWorkout = new Workout();
-        mappedWorkout.setName(dto.getName());
-        mappedWorkout.setWorkoutDate(dto.getWorkoutDate());
-        mappedWorkout.setDurationMinutes(dto.getDurationMinutes());
-        mappedWorkout.setCalories(dto.getCalories());
-
-        Category category = new Category();
-        category.setId(2L);
-
-        when(modelMapper.map(dto, Workout.class)).thenReturn(mappedWorkout);
-        when(categoryRepository.getReferenceById(2L)).thenReturn(category);
-
-        Workout result = workoutService.DTOtoEntity(dto);
-
-        assertSame(category, result.getCategory());
-        assertEquals("Cardio", result.getName());
-    }
-
-    @Test
-    void entityToDTO_ShouldMapAndAddIds() {
-        Workout workout = new Workout();
-        workout.setName("Strength");
-        workout.setWorkoutDate(LocalDateTime.now());
-        workout.setDurationMinutes(50);
-        workout.setCalories(550);
-
-        Category category = new Category();
-        category.setId(10L);
-        workout.setCategory(category);
-
-        WorkoutDTO mappedDto = new WorkoutDTO();
-        mappedDto.setName(workout.getName());
-        mappedDto.setWorkoutDate(workout.getWorkoutDate());
-        mappedDto.setDurationMinutes(workout.getDurationMinutes());
-        mappedDto.setCalories(workout.getCalories());
-
-        when(modelMapper.map(workout, WorkoutDTO.class)).thenReturn(mappedDto);
-
-        WorkoutDTO result = workoutService.entityToDTO(workout);
-
-        assertEquals(10L, result.getCategoryId());
-        assertEquals(550, result.getCalories());
-        verify(modelMapper).map(workout, WorkoutDTO.class);
     }
 }

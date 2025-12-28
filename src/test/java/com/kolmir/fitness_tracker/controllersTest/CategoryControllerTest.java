@@ -27,8 +27,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kolmir.fitness_tracker.controllers.CategoryController;
 import com.kolmir.fitness_tracker.dto.CategoryDTO;
 import com.kolmir.fitness_tracker.exceptions.FitnessTrackerExceptionHandler;
-import com.kolmir.fitness_tracker.models.Category;
-import com.kolmir.fitness_tracker.models.User;
 import com.kolmir.fitness_tracker.services.CategoryService;
 
 @ExtendWith(MockitoExtension.class)
@@ -53,36 +51,31 @@ class CategoryControllerTest {
     }
 
     @Test
-    void getAll_ShouldReturnUserCategories() throws Exception {
-        User user = new User();
-        user.setId(5L);
-
-        Category category = new Category();
+    void getAll_ShouldReturnUserCategories() {
         CategoryDTO categoryDTO = new CategoryDTO();
         categoryDTO.setName("Cardio");
 
-        when(categoryService.getAll(5L)).thenReturn(List.of(category));
-        when(categoryService.entityToDTO(category)).thenReturn(categoryDTO);
+        when(categoryService.getAll()).thenReturn(List.of(categoryDTO));
 
-        var result = categoryController.getAll(user);
+        var result = categoryController.getAll();
 
         assertEquals(1, result.size());
         assertEquals("Cardio", result.get(0).getName());
-        verify(categoryService).getAll(5L);
+        verify(categoryService).getAll();
     }
 
     @Test
     void getById_ShouldReturnCategory() throws Exception {
-        Category category = new Category();
         CategoryDTO dto = new CategoryDTO();
         dto.setName("Yoga");
 
-        when(categoryService.getById(1L)).thenReturn(category);
-        when(categoryService.entityToDTO(category)).thenReturn(dto);
+        when(categoryService.getById(1L)).thenReturn(dto);
 
         mockMvc.perform(get("/categories/{id}", 1L))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Yoga"));
+
+        verify(categoryService).getById(1L);
     }
 
     @Test
@@ -90,19 +83,18 @@ class CategoryControllerTest {
         CategoryDTO request = new CategoryDTO();
         request.setName("Stretching");
 
-        Category entity = new Category();
         CategoryDTO response = new CategoryDTO();
         response.setName("Stretching");
 
-        when(categoryService.DTOtoEntity(any(CategoryDTO.class))).thenReturn(entity);
-        when(categoryService.save(entity)).thenReturn(entity);
-        when(categoryService.entityToDTO(entity)).thenReturn(response);
+        when(categoryService.save(any(CategoryDTO.class))).thenReturn(response);
 
         mockMvc.perform(post("/categories")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("Stretching"));
+
+        verify(categoryService).save(any(CategoryDTO.class));
     }
 
     @Test
