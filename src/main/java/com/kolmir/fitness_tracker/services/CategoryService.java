@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.kolmir.fitness_tracker.dto.CategoryDTO;
-import com.kolmir.fitness_tracker.dto.CategoryMapper;
 import com.kolmir.fitness_tracker.exceptions.CategoryNotFoundException;
+import com.kolmir.fitness_tracker.mappers.CategoryMapper;
 import com.kolmir.fitness_tracker.models.Category;
 import com.kolmir.fitness_tracker.repository.CategoryRepository;
 import com.kolmir.fitness_tracker.security.CurrentUserProvider;

@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.kolmir.fitness_tracker.dto.ImageMapper;
 import com.kolmir.fitness_tracker.dto.ImageResponce;
+import com.kolmir.fitness_tracker.mappers.ImageMapper;
 import com.kolmir.fitness_tracker.models.Image;
 import com.kolmir.fitness_tracker.models.User;
 import com.kolmir.fitness_tracker.repository.ImageRepository;

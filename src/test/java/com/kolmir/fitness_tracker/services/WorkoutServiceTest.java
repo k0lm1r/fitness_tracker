@@ -28,8 +28,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.kolmir.fitness_tracker.dto.WorkoutDTO;
 import com.kolmir.fitness_tracker.dto.WorkoutFilter;
-import com.kolmir.fitness_tracker.dto.WorkoutMapper;
 import com.kolmir.fitness_tracker.exceptions.WorkoutNotFoundException;
+import com.kolmir.fitness_tracker.mappers.WorkoutMapper;
 import com.kolmir.fitness_tracker.models.User;
 import com.kolmir.fitness_tracker.models.Workout;
 import com.kolmir.fitness_tracker.repository.WorkoutRepository;

@@ -2,17 +2,18 @@ package com.kolmir.fitness_tracker.services;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.kolmir.fitness_tracker.dto.JwtResponse;
 import com.kolmir.fitness_tracker.dto.RefreshTokenRequest;
 import com.kolmir.fitness_tracker.dto.UserLoginRequest;
-import com.kolmir.fitness_tracker.dto.UserMapper;
 import com.kolmir.fitness_tracker.dto.UserRegisterRequest;
 import com.kolmir.fitness_tracker.exceptions.EmailAlreadyInUseException;
 import com.kolmir.fitness_tracker.exceptions.JwtNotValidException;
 import com.kolmir.fitness_tracker.exceptions.UsernameAlreadyExistsException;
+import com.kolmir.fitness_tracker.mappers.UserMapper;
 import com.kolmir.fitness_tracker.models.User;
 import com.kolmir.fitness_tracker.repository.UserRepository;
 import com.kolmir.fitness_tracker.security.JwtUtils;
@@ -25,9 +26,9 @@ public class AuthService {
 
     private final JwtUtils jwtUtils;
     private final AuthenticationManager authenticationManager;
-    private final UserService userService;
     private final UserMapper userMapper;
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public JwtResponse login(UserLoginRequest request) {
         authenticationManager.authenticate(
@@ -53,7 +54,7 @@ public class AuthService {
     }
     
     public JwtResponse register(UserRegisterRequest request) throws UsernameAlreadyExistsException, EmailAlreadyInUseException {
-        userService.createUser(userMapper.toEntity(request));
+        createUser(userMapper.toEntity(request));
 
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
@@ -64,8 +65,14 @@ public class AuthService {
         return new JwtResponse(accessToken, refreshToken);
     }
 
-    public User loadUserByUsername(String username) {
-        return userRepository.getUserByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("пользователь с таким именем не найден"));
+    @Transactional
+    private void createUser(User user) throws UsernameAlreadyExistsException, EmailAlreadyInUseException {
+        if (userRepository.existsByUsername(user.getUsername()))
+            throw new UsernameAlreadyExistsException("пользователь с таким именем уже существует");
+        if (userRepository.existsByEmail(user.getEmail()))
+            throw new EmailAlreadyInUseException("эта почта уже используется");
+        
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        userRepository.save(user);
     }
 }
