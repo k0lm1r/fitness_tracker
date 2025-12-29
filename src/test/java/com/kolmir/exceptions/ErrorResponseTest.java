@@ -1,10 +1,12 @@
-package com.kolmir.fitness_tracker.utils;
+package com.kolmir.exceptions;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
+
+import com.kolmir.fitness_tracker.exceptions.ErrorResponse;
 
 class ErrorResponseTest {
 

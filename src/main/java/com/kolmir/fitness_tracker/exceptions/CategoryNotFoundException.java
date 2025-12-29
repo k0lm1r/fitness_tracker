@@ -1,4 +1,4 @@
-package com.kolmir.fitness_tracker.utils.category;
+package com.kolmir.fitness_tracker.exceptions;
 
 public class CategoryNotFoundException extends Exception {
     public CategoryNotFoundException(String message) {

@@ -38,5 +38,5 @@ public class Workout {
     @Column(name = "duration_minutes")
     private Integer durationMinutes;
 
-    private int calories;
+    private Integer calories;
 }

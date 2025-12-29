@@ -1,21 +1,20 @@
 package com.kolmir.fitness_tracker.services;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.UUID;
+import java.time.LocalDateTime;
 
-import org.modelmapper.ModelMapper;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.kolmir.fitness_tracker.dto.ImageDTO;
+import com.kolmir.fitness_tracker.dto.ImageResponce;
+import com.kolmir.fitness_tracker.mappers.ImageMapper;
 import com.kolmir.fitness_tracker.models.Image;
 import com.kolmir.fitness_tracker.models.User;
 import com.kolmir.fitness_tracker.repository.ImageRepository;
+import com.kolmir.fitness_tracker.security.CurrentUserProvider;
 
+import io.minio.MinioClient;
+import io.minio.PutObjectArgs;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -23,40 +22,31 @@ import lombok.RequiredArgsConstructor;
 public class ImageService {
 
     private final ImageRepository imageRepository;
-    private final String UPLOAD_DIR = "images/";
-    private final ModelMapper modelMapper;
+    private final ImageMapper imageMapper;
+    private final MinioClient minioClient;
 
-    public Image upload(MultipartFile file) throws IOException {
-        String filename = saveImage(file);
+    @Value("${minio.bucket}")
+    private String bucket;
+
+    public ImageResponce upload(MultipartFile file) throws Exception {
+        Long currentUserId = CurrentUserProvider.getCurrentUserId();
+        String filename = LocalDateTime.now() + ".png";
         Image image = new Image();
-        User user = (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
+        User user = new User();
+        
+        user.setId(currentUserId);
         image.setFilename(filename);
-        image.setPath(Path.of(UPLOAD_DIR, filename).toString());
+        image.setPath("media/" + currentUserId + "/" + filename);
         image.setOwner(user);
 
-        return imageRepository.save(image);
-    }
+        minioClient.putObject(
+                    PutObjectArgs.builder()
+                            .bucket(bucket)
+                            .object(filename)
+                            .stream(file.getInputStream(), file.getSize(), -1)
+                            .contentType(file.getContentType())
+                            .build());
 
-    private void createUploadDirIfNotExists() {
-        File uploadDir = new File(UPLOAD_DIR);
-        if (!uploadDir.exists())
-            uploadDir.mkdirs();
-    }
-
-    private String saveImage(MultipartFile file) throws IOException {
-        byte[] imageBytes = file.getBytes();
-        String filename = UUID.randomUUID() + ".png";
-    
-        createUploadDirIfNotExists();
-        Files.write(Path.of(UPLOAD_DIR, filename), imageBytes);
-
-        return filename;
-    }
-
-    public ImageDTO entityToDTO(Image image) {
-        ImageDTO imageDTO = modelMapper.map(image, ImageDTO.class);
-        imageDTO.setOwnerId(image.getOwner().getId());
-        return imageDTO;
+        return imageMapper.toDTO(imageRepository.save(image));
     }
 }

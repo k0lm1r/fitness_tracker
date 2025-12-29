@@ -3,7 +3,6 @@ package com.kolmir.fitness_tracker.services;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -17,28 +16,24 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.kolmir.fitness_tracker.dto.CategoryDTO;
+import com.kolmir.fitness_tracker.exceptions.CategoryNotFoundException;
+import com.kolmir.fitness_tracker.mappers.CategoryMapper;
 import com.kolmir.fitness_tracker.models.Category;
 import com.kolmir.fitness_tracker.models.User;
 import com.kolmir.fitness_tracker.repository.CategoryRepository;
-import com.kolmir.fitness_tracker.repository.UserRepository;
-import com.kolmir.fitness_tracker.utils.category.CategoryNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 class CategoryServiceTest {
 
     @Mock
-    private UserRepository userRepository;
-
-    @Mock
     private CategoryRepository categoryRepository;
 
     @Mock
-    private ModelMapper modelMapper;
+    private CategoryMapper categoryMapper;
 
     @InjectMocks
     private CategoryService categoryService;
@@ -61,23 +56,29 @@ class CategoryServiceTest {
     @Test
     void getAll_ReturnsUserCategories() {
         Category category = new Category();
-        when(categoryRepository.findAllByOwnerId(1L)).thenReturn(List.of(category));
+        CategoryDTO dto = new CategoryDTO();
 
-        List<Category> result = categoryService.getAll(1L);
+        when(categoryRepository.findAllByOwnerId(authenticatedUser.getId())).thenReturn(List.of(category));
+        when(categoryMapper.toDTO(category)).thenReturn(dto);
+
+        List<CategoryDTO> result = categoryService.getAll();
 
         assertEquals(1, result.size());
-        assertSame(category, result.get(0));
-        verify(categoryRepository).findAllByOwnerId(1L);
+        assertSame(dto, result.get(0));
+        verify(categoryRepository).findAllByOwnerId(authenticatedUser.getId());
     }
 
     @Test
     void getById_ReturnsCategory() throws CategoryNotFoundException {
         Category category = new Category();
+        CategoryDTO dto = new CategoryDTO();
+
         when(categoryRepository.findById(5L)).thenReturn(Optional.of(category));
+        when(categoryMapper.toDTO(category)).thenReturn(dto);
 
-        Category result = categoryService.getById(5L);
+        CategoryDTO result = categoryService.getById(5L);
 
-        assertSame(category, result);
+        assertSame(dto, result);
         verify(categoryRepository).findById(5L);
     }
 
@@ -91,25 +92,39 @@ class CategoryServiceTest {
 
     @Test
     void save_SetsOwnerFromSecurityContext() {
-        Category category = new Category();
-        when(categoryRepository.save(any(Category.class))).thenReturn(category);
+        CategoryDTO dto = new CategoryDTO();
+        dto.setName("Test");
 
-        Category result = categoryService.save(category);
+        Category mappedEntity = new Category();
+        CategoryDTO responseDto = new CategoryDTO();
 
-        assertSame(authenticatedUser, result.getOwner());
-        verify(categoryRepository).save(category);
+        when(categoryMapper.toEntity(dto)).thenReturn(mappedEntity);
+        when(categoryRepository.save(mappedEntity)).thenReturn(mappedEntity);
+        when(categoryMapper.toDTO(mappedEntity)).thenReturn(responseDto);
+
+        CategoryDTO result = categoryService.save(dto);
+
+        assertSame(responseDto, result);
+        assertEquals(authenticatedUser.getId(), dto.getOwnerId());
+        verify(categoryRepository).save(mappedEntity);
     }
 
     @Test
     void update_SetsIdAndPersists() throws CategoryNotFoundException {
-        Category category = new Category();
+        CategoryDTO dto = new CategoryDTO();
+        Category entity = new Category();
+        CategoryDTO updatedDto = new CategoryDTO();
 
-        when(categoryRepository.save(category)).thenReturn(category);
+        when(categoryMapper.toEntity(dto)).thenReturn(entity);
+        when(categoryRepository.existsById(9L)).thenReturn(true);
+        when(categoryRepository.save(entity)).thenReturn(entity);
+        when(categoryMapper.toDTO(entity)).thenReturn(updatedDto);
 
-        Category result = categoryService.update(9L, category);
+        CategoryDTO result = categoryService.update(9L, dto);
 
-        assertEquals(9L, result.getId());
-        verify(categoryRepository).save(category);
+        assertSame(updatedDto, result);
+        assertEquals(9L, entity.getId());
+        verify(categoryRepository).existsById(9L);
     }
 
     @Test
@@ -127,45 +142,5 @@ class CategoryServiceTest {
         categoryService.delete(10L);
 
         verify(categoryRepository).deleteById(10L);
-    }
-
-    @Test
-    void DTOtoEntity_MapsAndSetsOwner() {
-        CategoryDTO dto = new CategoryDTO();
-        dto.setName("Test");
-        dto.setOwnerId(88L);
-
-        Category mappedCategory = new Category();
-        mappedCategory.setName("Test");
-
-        User owner = new User();
-        owner.setId(88L);
-
-        when(modelMapper.map(dto, Category.class)).thenReturn(mappedCategory);
-        when(userRepository.getReferenceById(88L)).thenReturn(owner);
-
-        Category result = categoryService.DTOtoEntity(dto);
-
-        assertSame(owner, result.getOwner());
-        assertEquals("Test", result.getName());
-    }
-
-    @Test
-    void entityToDTO_MapsAndAddsOwnerId() {
-        Category category = new Category();
-        category.setName("Cardio");
-        User owner = new User();
-        owner.setId(33L);
-        category.setOwner(owner);
-
-        CategoryDTO mappedDto = new CategoryDTO();
-        mappedDto.setName("Cardio");
-
-        when(modelMapper.map(category, CategoryDTO.class)).thenReturn(mappedDto);
-
-        CategoryDTO result = categoryService.entityToDTO(category);
-
-        assertEquals(33L, result.getOwnerId());
-        assertEquals("Cardio", result.getName());
     }
 }

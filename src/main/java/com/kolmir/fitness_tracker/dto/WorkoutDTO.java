@@ -14,21 +14,23 @@ import lombok.Setter;
 public class WorkoutDTO {
     @NotNull(message = "id категории не может быть пустым")
     @Positive(message = "id категории должен быть больше 0")
-    Long categoryId;
+    private Long categoryId;
 
     @NotBlank(message = "название не может быть пустым")
     @Size(min = 1, max = 100, message = "длина названия должна быть от 1 до 100 символов")
-    String name;
+    private String name;
 
     @NotNull(message = "поле даты тренировки не может быть пустым")
     @PastOrPresent(message = "дата тренировки не может быть в прошлом")
-    LocalDateTime workoutDate;
+    private LocalDateTime workoutDate;
 
     @NotNull(message = "длительность должна содержать значение")
     @Positive(message = "длительность тренировки должна быть больше 0")
-    Integer durationMinutes;
+    private Integer durationMinutes;
 
     @NotNull(message = "поле числа потраченных калорий не может быть пустым")
     @Positive(message = "число потраченных калорий должно быть больше 0")
-    int calories;
+    private Integer calories;
+
+    private Long ownerId;
 }
