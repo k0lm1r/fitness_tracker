@@ -1,7 +1,5 @@
 package com.kolmir.fitness_tracker.controllers.api;
 
-import java.io.IOException;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -36,5 +34,5 @@ public interface MediaControllerApi {
             content = @Content(mediaType = "multipart/form-data",
                     schema = @Schema(type = "string", format = "binary"),
                     examples = @ExampleObject(name = "Пример запроса", value = "(binary image file)")))
-    ResponseEntity<?> uploadImage(MultipartFile file) throws IOException;
+    ResponseEntity<?> uploadImage(MultipartFile file) throws Exception;
 }

@@ -1,7 +1,5 @@
 package com.kolmir.fitness_tracker.controllers;
 
-import java.io.IOException;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,7 +22,7 @@ public class MediaController implements MediaControllerApi {
     
     @PostMapping
     @Override
-    public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file ) throws IOException {
+    public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file ) throws Exception {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(imageService.upload(file));
     }
