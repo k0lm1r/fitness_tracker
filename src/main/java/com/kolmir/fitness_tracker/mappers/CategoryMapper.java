@@ -21,6 +21,7 @@ public abstract class CategoryMapper {
     public abstract CategoryDTO toDTO(Category category);
 
     @Mapping(target = "owner", ignore = true)
+    @Mapping(target = "id", ignore = true)
     public abstract Category toEntity(CategoryDTO categoryDTO);
 
     @AfterMapping
