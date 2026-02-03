@@ -25,7 +25,7 @@ import com.kolmir.fitness_tracker.mappers.CategoryMapper;
 import com.kolmir.fitness_tracker.models.Category;
 import com.kolmir.fitness_tracker.models.User;
 import com.kolmir.fitness_tracker.repository.CategoryRepository;
-
+//test
 @ExtendWith(MockitoExtension.class)
 class CategoryServiceTest {
 
