@@ -24,6 +24,7 @@ public abstract class WorkoutMapper {
 
     @Mapping(target = "owner", ignore = true)
     @Mapping(target = "category", ignore = true)
+    @Mapping(target = "id", ignore = true)
     public abstract Workout toEntity(WorkoutDTO workoutDTO);
 
     @AfterMapping
