@@ -40,6 +40,7 @@ class CategoryServiceTest {
 
     private User authenticatedUser;
 
+    
     @BeforeEach
     void setUpAuth() {
         authenticatedUser = new User();
