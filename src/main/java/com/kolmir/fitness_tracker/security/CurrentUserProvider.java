@@ -6,6 +6,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.kolmir.fitness_tracker.models.User;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CurrentUserProvider {
     public static Long getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -18,6 +23,6 @@ public class CurrentUserProvider {
         if (!(principal instanceof User))
             throw new AccessDeniedException("текущий пользователь не найден");
         
-        return ((User)principal).getId();
+        return ((User) principal).getId();
     }
 }

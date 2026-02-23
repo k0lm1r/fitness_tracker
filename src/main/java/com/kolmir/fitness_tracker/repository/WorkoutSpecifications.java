@@ -12,7 +12,11 @@ import com.kolmir.fitness_tracker.models.Workout;
 
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class WorkoutSpecifications {
     public static Specification<Workout> withFilter(WorkoutFilter workoutFilter) {
         return Specification.where(hasOwner(workoutFilter.getOwnerId()))
@@ -22,9 +26,7 @@ public class WorkoutSpecifications {
     }
 
     private static Specification<Workout> hasOwner(Long ownerId) {
-        return (root, query, cb) -> {
-            return cb.equal(root.get("owner").get("id"), ownerId);
-        };
+        return (root, query, cb) -> cb.equal(root.get("owner").get("id"), ownerId);
     }
 
     private static Specification<Workout> hasCategory(String categoryName) {

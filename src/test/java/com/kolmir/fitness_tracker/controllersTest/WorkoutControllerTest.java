@@ -131,7 +131,7 @@ class WorkoutControllerTest {
     }
 
     @Test
-    void getAllWithFilters_ShouldReturnPagedWorkouts() throws Exception {
+    void getAllWithFilters_ShouldReturnPagedWorkouts() {
         WorkoutDTO dto1 = new WorkoutDTO();
         dto1.setName("Morning Run");
         WorkoutDTO dto2 = new WorkoutDTO();

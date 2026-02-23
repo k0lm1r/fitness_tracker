@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.kolmir.fitness_tracker.controllers.api.CategoryControllerApi;
 import com.kolmir.fitness_tracker.dto.CategoryDTO;
 import com.kolmir.fitness_tracker.exceptions.CategoryNotFoundException;
 import com.kolmir.fitness_tracker.services.CategoryService;
@@ -24,31 +23,27 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/categories")
-public class CategoryController implements CategoryControllerApi {
+public class CategoryController {
 
     private final CategoryService categoryService;
 
     @GetMapping
-    @Override
     public List<CategoryDTO> getAll() {
         return categoryService.getAll();
     }
     
     @GetMapping("/{id}")
-    @Override
-    public ResponseEntity<?> getById(@PathVariable Long id) throws CategoryNotFoundException {
+    public ResponseEntity<CategoryDTO> getById(@PathVariable Long id) throws CategoryNotFoundException {
         return ResponseEntity.ok(categoryService.getById(id));
     }
 
     @PostMapping
-    @Override
-    public ResponseEntity<?> create(@RequestBody @Valid CategoryDTO categoryDTO) {
+    public ResponseEntity<CategoryDTO> create(@RequestBody @Valid CategoryDTO categoryDTO) {
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(categoryService.save(categoryDTO)); 
     }
     
     @PutMapping("/{id}")
-    @Override
     public ResponseEntity<CategoryDTO> update(
                     @PathVariable Long id, 
                     @Valid @RequestBody CategoryDTO categoryDTO) throws CategoryNotFoundException {
@@ -58,7 +53,6 @@ public class CategoryController implements CategoryControllerApi {
     }
     
     @DeleteMapping("/{id}")
-    @Override
     public ResponseEntity<Void> delete(@PathVariable Long id) throws CategoryNotFoundException {
         categoryService.delete(id);
         return ResponseEntity.noContent().build();

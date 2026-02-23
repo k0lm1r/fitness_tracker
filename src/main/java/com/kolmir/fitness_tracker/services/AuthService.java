@@ -53,6 +53,7 @@ public class AuthService {
         return new JwtResponse(newAccessToken, refreshToken);
     }
     
+    @Transactional
     public JwtResponse register(UserRegisterRequest request) throws UsernameAlreadyExistsException, EmailAlreadyInUseException {
         createUser(userMapper.toEntity(request));
 
@@ -65,7 +66,6 @@ public class AuthService {
         return new JwtResponse(accessToken, refreshToken);
     }
 
-    @Transactional
     private void createUser(User user) throws UsernameAlreadyExistsException, EmailAlreadyInUseException {
         if (userRepository.existsByUsername(user.getUsername()))
             throw new UsernameAlreadyExistsException("пользователь с таким именем уже существует");
