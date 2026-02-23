@@ -3,7 +3,6 @@ package com.kolmir.fitness_tracker.services;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -146,8 +145,8 @@ class AuthServiceTest {
         when(passwordEncoder.encode("password")).thenReturn("encoded");
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn((Authentication) null);
-        when(jwtUtils.generateAccessToken(eq("john"))).thenReturn("access-token");
-        when(jwtUtils.generateRefreshToken(eq("john"))).thenReturn("refresh-token");
+        when(jwtUtils.generateAccessToken("john")).thenReturn("access-token");
+        when(jwtUtils.generateRefreshToken("john")).thenReturn("refresh-token");
 
         JwtResponse response = authService.register(request);
 
