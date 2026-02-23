@@ -1,7 +1,7 @@
 # Fitness Tracker API
 
 # Андрей Котов 450502
-[#SonarCloud](https://sonarcloud.io/project/overview?id=k0lm1r_fitness_tracker)
+# [SonarCloud](https://sonarcloud.io/project/overview?id=k0lm1r_fitness_tracker)
 
 ## Основные эндпоинты
 
