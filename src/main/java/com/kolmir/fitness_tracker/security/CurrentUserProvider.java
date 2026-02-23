@@ -18,6 +18,6 @@ public class CurrentUserProvider {
         if (!(principal instanceof User))
             throw new AccessDeniedException("текущий пользователь не найден");
         
-        return ((User)principal).getId();
+        return ((User) principal).getId();
     }
 }

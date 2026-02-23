@@ -1,6 +1,7 @@
 package com.kolmir.fitness_tracker.controllers.api;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -20,7 +21,6 @@ import com.kolmir.fitness_tracker.exceptions.JwtNotValidException;
 import com.kolmir.fitness_tracker.exceptions.UsernameAlreadyExistsException;
 
 import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.RequestBody;
 
 @Tag(name = "Auth", description = "Аутентификация и управление токенами")
 public interface AuthControllerApi {
