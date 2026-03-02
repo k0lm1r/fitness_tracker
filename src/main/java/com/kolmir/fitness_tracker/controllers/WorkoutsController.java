@@ -1,5 +1,7 @@
 package com.kolmir.fitness_tracker.controllers;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -21,6 +23,7 @@ import com.kolmir.fitness_tracker.services.WorkoutService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -56,4 +59,10 @@ public class WorkoutsController {
         workoutService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/with-workout-sets")
+    public List<WorkoutDTO> getAllWithWorkoutSets() {
+        return workoutService.getAllWithWorkoutSets();
+    }
+    
 }

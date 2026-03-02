@@ -1,5 +1,7 @@
 package com.kolmir.fitness_tracker.services;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -63,5 +65,12 @@ public class WorkoutService {
         if (!workoutRepository.existsById(id))
             throw new WorkoutNotFoundException("невозможно удалить несуществующую тренировку");
         workoutRepository.deleteById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<WorkoutDTO> getAllWithWorkoutSets() {
+        return workoutRepository.findAllWithSets().stream()
+                .map(workoutMapper::toDTO)
+                .toList();
     }
 }

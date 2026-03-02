@@ -25,4 +25,22 @@ CREATE TABLE IF NOT EXISTS images (
     owner_id INT REFERENCES users(id) ON DELETE SET NULL
 );
 
+CREATE TABLE IF NOT EXISTS workout_sets (
+    id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    name VARCHAR(100) NOT NULL,
+    owner_id INT REFERENCES users(id) ON DELETE SET NULL
+);
 
+
+INSERT INTO users (username, password, email) VALUES ('test1', '$2a$12$WPx9OQggyMmWrepEKVfpse5gx1cVefYtt1yMcEm6HfUFTs3iZYlCy', 'test1@gmail.com');
+INSERT INTO categories (name, owner_id) VALUES ('testCategory', 1);
+INSERT INTO workout_sets (name, owner_id) VALUES ('set1', 1);
+
+
+DO $$
+BEGIN
+    FOR i IN 1..50 LOOP
+        INSERT INTO workouts (category_id, name, owner_id, workout_date, duration_minutes, calories)
+        VALUES (1, 'workout' || i, 1, CURRENT_DATE, 1, 1);
+    END LOOP;
+END $$;

@@ -4,6 +4,7 @@ import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.ReportingPolicy;
 
 import com.kolmir.fitness_tracker.dto.WorkoutDTO;
 import com.kolmir.fitness_tracker.models.Category;
@@ -13,7 +14,11 @@ import com.kolmir.fitness_tracker.models.Workout;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
-@Mapper(componentModel = "spring")
+
+@Mapper(
+    componentModel = "spring",
+    unmappedTargetPolicy = ReportingPolicy.IGNORE
+)
 public abstract class WorkoutMapper {
     @PersistenceContext
     protected EntityManager entityManager;
@@ -22,9 +27,6 @@ public abstract class WorkoutMapper {
     @Mapping(target = "categoryId", source = "category.id")
     public abstract WorkoutDTO toDTO(Workout workout);
 
-    @Mapping(target = "owner", ignore = true)
-    @Mapping(target = "category", ignore = true)
-    @Mapping(target = "id", ignore = true)
     public abstract Workout toEntity(WorkoutDTO workoutDTO);
 
     @AfterMapping
