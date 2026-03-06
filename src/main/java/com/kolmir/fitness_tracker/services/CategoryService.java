@@ -6,7 +6,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.kolmir.fitness_tracker.dto.CategoryDTO;
+import com.kolmir.fitness_tracker.dto.category.CategoryDTO;
 import com.kolmir.fitness_tracker.exceptions.CategoryNotFoundException;
 import com.kolmir.fitness_tracker.mappers.CategoryMapper;
 import com.kolmir.fitness_tracker.models.Category;

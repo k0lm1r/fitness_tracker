@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.kolmir.fitness_tracker.dto.CategoryDTO;
+import com.kolmir.fitness_tracker.dto.category.CategoryDTO;
 import com.kolmir.fitness_tracker.exceptions.CategoryNotFoundException;
 import com.kolmir.fitness_tracker.services.CategoryService;
 

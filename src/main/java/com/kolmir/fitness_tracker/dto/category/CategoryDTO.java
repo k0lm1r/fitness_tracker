@@ -1,4 +1,4 @@
-package com.kolmir.fitness_tracker.dto;
+package com.kolmir.fitness_tracker.dto.category;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

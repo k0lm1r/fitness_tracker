@@ -6,13 +6,14 @@ import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
-import com.kolmir.fitness_tracker.dto.WorkoutSetRequest;
-import com.kolmir.fitness_tracker.dto.WorkoutSetResponse;
-import com.kolmir.fitness_tracker.mappers.WorkoutSetMapper;
+import com.kolmir.fitness_tracker.dto.workout.WorkoutSetRequest;
+import com.kolmir.fitness_tracker.dto.workout.WorkoutSetResponse;
+import com.kolmir.fitness_tracker.exceptions.WorkoutNotFoundException;
+import com.kolmir.fitness_tracker.mappers.ExerciseMapper;
+import com.kolmir.fitness_tracker.mappers.WorkoutMapper;
+import com.kolmir.fitness_tracker.models.Exercise;
 import com.kolmir.fitness_tracker.models.Workout;
-import com.kolmir.fitness_tracker.models.WorkoutSet;
 import com.kolmir.fitness_tracker.repository.WorkoutRepository;
-import com.kolmir.fitness_tracker.repository.WorkoutSetRepository;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -20,9 +21,10 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class WorkoutSetService {
-    private final WorkoutSetRepository workoutSetRepository;
-    private final WorkoutRepository workoutRepository;
-    private final WorkoutSetMapper workoutSetMapper;
+    private final WorkoutRepository workoutSetRepository;
+    private final ExerciseService workoutService;
+    private final WorkoutMapper workoutSetMapper;
+    private final ExerciseMapper workoutMapper;
 
     @Transactional
     public List<WorkoutSetResponse> getAll() {
@@ -31,17 +33,15 @@ public class WorkoutSetService {
                 .toList();
     }
 
-    public WorkoutSetResponse saveWithoutTransactional(WorkoutSetRequest request) {
-        WorkoutSet workoutSet = workoutSetMapper.toWorkoutSet(request);
-        Set<Workout> workouts = workoutSet.getWorkouts();
-        workoutSet.setWorkouts(new HashSet<>());
+    public WorkoutSetResponse saveWithoutTransactional(WorkoutSetRequest request) throws WorkoutNotFoundException {
+        Workout workoutSet = workoutSetMapper.toWorkoutSet(request);
+        Set<Exercise> workouts = workoutSet.getExercises();
+        workoutSet.setExercises(new HashSet<>());
         
         for (var w : workouts) {
-            Set<WorkoutSet> sets = w.getWorkoutSets();
-            sets.add(workoutSet);
-            w.setWorkoutSets(sets);
-            workoutSet.getWorkouts().add(w);
-            workoutRepository.save(w);
+            w.getWorkouts().add(workoutSet);
+            workoutSet.getExercises().add(w);
+            workoutService.update(w.getId(), workoutMapper.toDTO(w));
             workoutSetRepository.save(workoutSet);
         }
         
@@ -49,8 +49,7 @@ public class WorkoutSetService {
     }
 
     @Transactional
-    public WorkoutSetResponse saveWithTransactional(WorkoutSetRequest request) {
+    public WorkoutSetResponse saveWithTransactional(WorkoutSetRequest request) throws WorkoutNotFoundException {
         return saveWithoutTransactional(request);
     }
-    
 }

@@ -1,5 +1,7 @@
 package com.kolmir.fitness_tracker.models;
 
+import java.time.LocalDate;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -14,15 +16,21 @@ import lombok.Setter;
 
 @Entity
 @Getter @Setter
-@Table(name = "categories")
-public class Category {
+@Table(name = "days")
+public class Day {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "owner_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.REMOVE)
     private User owner;
+
+    private LocalDate date;
+    
+    @JoinColumn(name = "workout_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    private Workout workout;
+
+    private Integer calories;
 }

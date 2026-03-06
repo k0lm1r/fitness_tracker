@@ -1,4 +1,4 @@
-package com.kolmir.fitness_tracker.dto;
+package com.kolmir.fitness_tracker.dto.image;
 
 import lombok.Getter;
 import lombok.Setter;

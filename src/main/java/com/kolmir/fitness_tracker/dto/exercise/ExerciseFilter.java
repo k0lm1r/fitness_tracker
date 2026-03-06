@@ -1,16 +1,14 @@
-package com.kolmir.fitness_tracker.dto;
-
-import java.time.LocalDateTime;
+package com.kolmir.fitness_tracker.dto.exercise;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
-public class WorkoutFilter {
+public class ExerciseFilter {
+    private String name;
+    private Long categoryId;
     private String categoryName;
     private Long ownerId;
-    private LocalDateTime dateFrom;
-    private LocalDateTime dateTo;
     private Integer durationMinutesFrom;
     private Integer durationMinutesTo;
 }

@@ -5,7 +5,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-import com.kolmir.fitness_tracker.dto.CategoryDTO;
+import com.kolmir.fitness_tracker.dto.category.CategoryDTO;
 import com.kolmir.fitness_tracker.models.Category;
 import com.kolmir.fitness_tracker.models.User;
 

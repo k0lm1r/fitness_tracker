@@ -6,10 +6,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.kolmir.fitness_tracker.dto.JwtResponse;
-import com.kolmir.fitness_tracker.dto.RefreshTokenRequest;
-import com.kolmir.fitness_tracker.dto.UserLoginRequest;
-import com.kolmir.fitness_tracker.dto.UserRegisterRequest;
+import com.kolmir.fitness_tracker.dto.jwt.JwtResponse;
+import com.kolmir.fitness_tracker.dto.jwt.RefreshTokenRequest;
+import com.kolmir.fitness_tracker.dto.user.UserLoginRequest;
+import com.kolmir.fitness_tracker.dto.user.UserRegisterRequest;
 import com.kolmir.fitness_tracker.exceptions.EmailAlreadyInUseException;
 import com.kolmir.fitness_tracker.exceptions.JwtNotValidException;
 import com.kolmir.fitness_tracker.exceptions.UsernameAlreadyExistsException;

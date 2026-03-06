@@ -3,8 +3,9 @@ package com.kolmir.fitness_tracker.controllers;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.kolmir.fitness_tracker.dto.WorkoutSetRequest;
-import com.kolmir.fitness_tracker.dto.WorkoutSetResponse;
+import com.kolmir.fitness_tracker.dto.workout.WorkoutSetRequest;
+import com.kolmir.fitness_tracker.dto.workout.WorkoutSetResponse;
+import com.kolmir.fitness_tracker.exceptions.WorkoutNotFoundException;
 import com.kolmir.fitness_tracker.services.WorkoutSetService;
 
 import lombok.RequiredArgsConstructor;
@@ -32,7 +33,7 @@ public class WorkoutSetController {
 
     @PostMapping
     public WorkoutSetResponse createWorkoutSet(@RequestBody WorkoutSetRequest request, 
-                                                @RequestParam boolean withTransactional) {
+                                                @RequestParam boolean withTransactional) throws WorkoutNotFoundException {
         return withTransactional ? workoutSetService.saveWithTransactional(request) : workoutSetService.saveWithoutTransactional(request);
     }
     

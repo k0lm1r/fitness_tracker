@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.kolmir.fitness_tracker.dto.ImageResponce;
+import com.kolmir.fitness_tracker.dto.image.ImageResponce;
 import com.kolmir.fitness_tracker.services.ImageService;
 
 import lombok.RequiredArgsConstructor;

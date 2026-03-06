@@ -3,7 +3,7 @@ package com.kolmir.fitness_tracker.mappers;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import com.kolmir.fitness_tracker.dto.UserRegisterRequest;
+import com.kolmir.fitness_tracker.dto.user.UserRegisterRequest;
 import com.kolmir.fitness_tracker.models.User;
 
 @Mapper(componentModel = "spring")

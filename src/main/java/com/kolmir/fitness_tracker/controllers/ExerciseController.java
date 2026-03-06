@@ -15,11 +15,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.kolmir.fitness_tracker.dto.WorkoutDTO;
-import com.kolmir.fitness_tracker.dto.WorkoutFilter;
+import com.kolmir.fitness_tracker.dto.exercise.ExerciseDTO;
+import com.kolmir.fitness_tracker.dto.exercise.ExerciseFilter;
 import com.kolmir.fitness_tracker.exceptions.WorkoutNotFoundException;
 import com.kolmir.fitness_tracker.security.CurrentUserProvider;
-import com.kolmir.fitness_tracker.services.WorkoutService;
+import com.kolmir.fitness_tracker.services.ExerciseService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,41 +28,42 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/workouts")
-public class WorkoutsController {
-    private final WorkoutService workoutService;
+public class ExerciseController {
+    private final ExerciseService exericesService;
 
     @GetMapping
-    public Page<WorkoutDTO> getAllWithFilters(WorkoutFilter workoutFilter, Pageable pageable) {
+    public Page<ExerciseDTO> getAllWithFilters(ExerciseFilter workoutFilter, Pageable pageable) {
         workoutFilter.setOwnerId(CurrentUserProvider.getCurrentUserId());
-        return workoutService.getAllByOwnerId(workoutFilter, pageable);
+        return exericesService.getAllByOwnerId(workoutFilter, pageable);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<WorkoutDTO> getById(@PathVariable Long id) throws WorkoutNotFoundException {
-        return new ResponseEntity<>(workoutService.getById(id), HttpStatus.OK);
+    public ResponseEntity<ExerciseDTO> getById(@PathVariable Long id) throws WorkoutNotFoundException {
+        return new ResponseEntity<>(exericesService.getById(id), HttpStatus.OK);
     }
     
     @PostMapping
-    public ResponseEntity<WorkoutDTO> create(@Valid @RequestBody WorkoutDTO workoutDTO) {
-        return new ResponseEntity<>(workoutService.save(workoutDTO), HttpStatus.CREATED);
+    public ResponseEntity<ExerciseDTO> create(@Valid @RequestBody ExerciseDTO workoutDTO) {
+        return new ResponseEntity<>(exericesService.save(workoutDTO), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<WorkoutDTO> update(
+    public ResponseEntity<ExerciseDTO> update(
                     @PathVariable Long id, 
-                    @Valid @RequestBody WorkoutDTO workoutDTO) throws WorkoutNotFoundException {
-        return ResponseEntity.ok(workoutService.update(id, workoutDTO));
+                    @Valid @RequestBody ExerciseDTO workoutDTO) throws WorkoutNotFoundException {
+        return ResponseEntity.ok(exericesService.update(id, workoutDTO));
     }
     
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) throws WorkoutNotFoundException {
-        workoutService.delete(id);
+        exericesService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/with-workout-sets")
-    public List<WorkoutDTO> getAllWithWorkoutSets() {
-        return workoutService.getAllWithWorkoutSets();
+    public List<ExerciseDTO> getAllWithWorkoutSets() {
+        return exericesService.getAllWithWorkoutSets();
     }
+    
     
 }
