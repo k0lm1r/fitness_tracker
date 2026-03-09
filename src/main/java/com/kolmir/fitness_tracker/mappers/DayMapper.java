@@ -27,8 +27,7 @@ public abstract class DayMapper {
     public abstract DayResponse toResponse(Day day);
 
     @AfterMapping
-    protected void setOwnerIdAndWorkoutId(Day day, @MappingTarget DayResponse response) {
-        response.setOwnerId(day.getOwner().getId());
+    protected void setWorkoutId(Day day, @MappingTarget DayResponse response) {
         response.setWokroutId(day.getWorkout().getId());
     }
 

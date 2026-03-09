@@ -1,7 +1,5 @@
 package com.kolmir.fitness_tracker.controllers;
 
-import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -58,12 +56,5 @@ public class ExerciseController {
     public ResponseEntity<Void> delete(@PathVariable Long id) throws WorkoutNotFoundException {
         exericesService.delete(id);
         return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/with-workout-sets")
-    public List<ExerciseDTO> getAllWithWorkoutSets() {
-        return exericesService.getAllWithWorkoutSets();
-    }
-    
-    
+    }    
 }

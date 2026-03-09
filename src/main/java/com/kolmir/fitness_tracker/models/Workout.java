@@ -1,15 +1,9 @@
 package com.kolmir.fitness_tracker.models;
 
-import java.time.DayOfWeek;
 import java.util.Set;
 
 import jakarta.persistence.CascadeType;
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -33,10 +27,10 @@ public class Workout {
 
     private String name;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.REMOVE)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private User owner;
 
-    @ManyToMany(cascade = CascadeType.PERSIST)
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable (
         name = "workout_exercises",
         joinColumns = @JoinColumn(name = "workout_id"),
@@ -45,14 +39,16 @@ public class Workout {
             columnNames = {"workout_id", "exercise_id"}
         )
     )
-    Set<Exercise> exercises;
+    private Set<Exercise> exercises;
 
-    @ElementCollection
-    @CollectionTable (
-        name = "days_of_week",
-        joinColumns = @JoinColumn(name = "workout_id")
+    @ManyToMany(cascade = {CascadeType.PERSIST})
+    @JoinTable (
+        name = "workout_days",
+        joinColumns = @JoinColumn(name = "workout_id"),
+        inverseJoinColumns = @JoinColumn(name = "day_id"),
+        uniqueConstraints = @UniqueConstraint (
+            columnNames = {"workout_id", "day_id"}
+        )
     )
-    @Column(name = "day_name")
-    @Enumerated(EnumType.STRING)
-    Set<DayOfWeek> workoutDays;
+    private Set<DayOfWeekEntity> days;
 }

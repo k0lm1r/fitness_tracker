@@ -2,7 +2,6 @@ package com.kolmir.fitness_tracker.models;
 
 import java.util.Set;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -16,6 +15,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
+
 @Entity
 @Getter @Setter
 @Table(name = "exercises")
@@ -24,15 +24,11 @@ public class Exercise {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.REMOVE)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "category_id")
     private Category category;   
     
     private String name;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "owner_id")
-    private User owner;
 
     @Column(name = "duration_minutes")
     private Integer durationMinutes;

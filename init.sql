@@ -25,7 +25,6 @@ CREATE TABLE IF NOT EXISTS exercises (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     category_id BIGINT NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
     name VARCHAR(100) NOT NULL CHECK (char_length(name) >= 1),
-    owner_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     duration_minutes INT NOT NULL CHECK (duration_minutes > 0)
 );
 
@@ -43,16 +42,14 @@ CREATE TABLE IF NOT EXISTS workout_exercises (
 
 CREATE TABLE IF NOT EXISTS days (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    owner_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     date TIMESTAMP NOT NULL,
     workout_id BIGINT NOT NULL REFERENCES workouts(id) ON DELETE CASCADE,
     calories INT NOT NULL CHECK (calories > 0)
 );
 
 CREATE TABLE IF NOT EXISTS days_of_week (
-    workout_id BIGINT NOT NULL REFERENCES workouts(id) ON DELETE CASCADE,
-    day_name VARCHAR(20) NOT NULL,
-    PRIMARY KEY (workout_id, day_name)
+    id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    day_name VARCHAR(20) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS images (
@@ -62,16 +59,16 @@ CREATE TABLE IF NOT EXISTS images (
     owner_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE
 );
 
--- seed data
 INSERT INTO users (username, password, email)
 VALUES ('test1', '$2a$12$WPx9OQggyMmWrepEKVfpse5gx1cVefYtt1yMcEm6HfUFTs3iZYlCy', 'test1@gmail.com');
 
 INSERT INTO categories (name, owner_id) VALUES ('testCategory', 1);
 
-INSERT INTO exercises (category_id, name, owner_id, duration_minutes)
-VALUES (1, 'Push Ups', 1, 10),
-       (1, 'Plank', 1, 5);
+INSERT INTO exercises (category_id, name, duration_minutes)
+VALUES (1, 'Push Ups', 10),
+       (1, 'Plank', 5);
 
 INSERT INTO workouts (name, owner_id) VALUES ('Morning Routine', 1), ('Evening Stretch', 1);
 
 INSERT INTO workout_exercises (workout_id, exercise_id) VALUES (1, 1), (1, 2), (2, 2);
+INSERT INTO days_of_week(day_name) VALUES ('MONDAY'), ('TUESDAY'), ('WEDNESDAY'), ('THURSDAY'), ('FRIDAY'), ('SATURDAY'), ('SUNDAY');

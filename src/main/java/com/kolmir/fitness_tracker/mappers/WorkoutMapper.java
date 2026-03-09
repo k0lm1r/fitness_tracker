@@ -41,4 +41,14 @@ public abstract class WorkoutMapper {
             .collect(Collectors.toSet())
         );
     }
+
+    @AfterMapping
+    protected void setWorkoutIds(Workout workout, @MappingTarget WorkoutSetResponse response) {
+        if (workout.getExercises() != null)
+            response.setExerciseIds(
+                workout.getExercises().stream()
+                .map(e -> e.getId())
+                .collect(Collectors.toSet())
+            );
+    }
 }

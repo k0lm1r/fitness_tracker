@@ -32,7 +32,7 @@ public class ExerciseSpecifications {
             if (ownerId == null) {
                 return cb.conjunction();
             }
-            return cb.equal(root.get("owner").get("id"), ownerId);
+            return cb.equal(root.get("category").get("owner").get("id"), ownerId);
         };
     }
 

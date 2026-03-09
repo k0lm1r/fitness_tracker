@@ -37,12 +37,12 @@ public class WorkoutSetService {
         Workout workoutSet = workoutSetMapper.toWorkoutSet(request);
         Set<Exercise> workouts = workoutSet.getExercises();
         workoutSet.setExercises(new HashSet<>());
+        workoutSetRepository.save(workoutSet);
         
         for (var w : workouts) {
             w.getWorkouts().add(workoutSet);
             workoutSet.getExercises().add(w);
             workoutService.update(w.getId(), workoutMapper.toDTO(w));
-            workoutSetRepository.save(workoutSet);
         }
         
         return workoutSetMapper.toWorkoutSetResponse(workoutSetRepository.save(workoutSetMapper.toWorkoutSet(request)));

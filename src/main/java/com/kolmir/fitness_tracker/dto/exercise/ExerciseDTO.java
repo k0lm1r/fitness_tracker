@@ -1,5 +1,7 @@
 package com.kolmir.fitness_tracker.dto.exercise;
 
+import java.util.Set;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -23,5 +25,5 @@ public class ExerciseDTO {
     @Positive(message = "длительность тренировки должна быть больше 0")
     private Integer durationMinutes;
 
-    private Long ownerId;
+    private Set<Long> workoutIds;
 }

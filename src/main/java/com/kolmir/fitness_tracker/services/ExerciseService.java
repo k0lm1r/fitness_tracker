@@ -1,7 +1,5 @@
 package com.kolmir.fitness_tracker.services;
 
-import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -16,8 +14,6 @@ import com.kolmir.fitness_tracker.mappers.ExerciseMapper;
 import com.kolmir.fitness_tracker.models.Exercise;
 import com.kolmir.fitness_tracker.repository.ExerciseRepository;
 import com.kolmir.fitness_tracker.repository.ExerciseSpecifications;
-import com.kolmir.fitness_tracker.security.CurrentUserProvider;
-
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -33,7 +29,7 @@ public class ExerciseService {
     }
 
     @Transactional(readOnly = true)
-    @PreAuthorize("@workoutRepository.existsByIdAndOwnerId(#id, authentication.principal.id)")
+    @PreAuthorize("@exerciseRepository.existsByIdAndOwnerId(#id, authentication.principal.id)")
     public ExerciseDTO getById(Long id) throws WorkoutNotFoundException {
         return workoutMapper.toDTO(exerciseRepository.findById(id).orElseThrow(
             () -> new WorkoutNotFoundException("Тренеровка с таким id не найдена.")
@@ -42,13 +38,12 @@ public class ExerciseService {
 
     @Transactional
     public ExerciseDTO save(ExerciseDTO workoutDTO) {
-        workoutDTO.setOwnerId(CurrentUserProvider.getCurrentUserId());
         Exercise workout = workoutMapper.toEntity(workoutDTO);
         return workoutMapper.toDTO(exerciseRepository.save(workout));
     }
 
     @Transactional
-    @PreAuthorize("@workoutRepository.existsByIdAndOwnerId(#id, authentication.principal.id)")
+    @PreAuthorize("@exerciseRepository.existsByIdAndOwnerId(#id, authentication.principal.id)")
     public ExerciseDTO update(Long id, ExerciseDTO workoutDTO) throws WorkoutNotFoundException {
         Exercise workout = workoutMapper.toEntity(workoutDTO);
         workout.setId(id);
@@ -60,17 +55,10 @@ public class ExerciseService {
     }
 
     @Transactional
-    @PreAuthorize("@workoutRepository.existsByIdAndOwnerId(#id, authentication.principal.id)")
+    @PreAuthorize("@exerciseRepository.existsByIdAndOwnerId(#id, authentication.principal.id)")
     public void delete(Long id) throws WorkoutNotFoundException {
         if (!exerciseRepository.existsById(id))
             throw new WorkoutNotFoundException("невозможно удалить несуществующую тренировку");
         exerciseRepository.deleteById(id);
-    }
-
-    @Transactional(readOnly = true)
-    public List<ExerciseDTO> getAllWithWorkoutSets() {
-        return exerciseRepository.findAllWithSets().stream()
-                .map(workoutMapper::toDTO)
-                .toList();
     }
 }
