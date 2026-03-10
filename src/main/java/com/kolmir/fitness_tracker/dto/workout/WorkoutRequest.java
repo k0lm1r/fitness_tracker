@@ -9,11 +9,11 @@ import lombok.Setter;
 
 
 @Getter @Setter
-public class WorkoutSetRequest {
+public class WorkoutRequest {
     @NotBlank
-    @Size(min = 1, max = 100, message = "workout sets name should be from 1 to 100 characters")
+    @Size(min = 1, max = 100, message = "workout name should be from 1 to 100 characters")
     private String name;
 
-    private Set<Long> workoutIds;
+    private Set<Long> exerciseIds;
     private Long ownerId;
 }

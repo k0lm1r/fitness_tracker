@@ -13,7 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.kolmir.fitness_tracker.dto.exercise.ExerciseDTO;
+import com.kolmir.fitness_tracker.dto.exercise.ExerciseRequest;
+import com.kolmir.fitness_tracker.dto.exercise.ExerciseResponse;
 import com.kolmir.fitness_tracker.dto.exercise.ExerciseFilter;
 import com.kolmir.fitness_tracker.exceptions.WorkoutNotFoundException;
 import com.kolmir.fitness_tracker.security.CurrentUserProvider;
@@ -25,36 +26,36 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/workouts")
+@RequestMapping("/exercises")
 public class ExerciseController {
-    private final ExerciseService exericesService;
+    private final ExerciseService exerciseService;
 
     @GetMapping
-    public Page<ExerciseDTO> getAllWithFilters(ExerciseFilter workoutFilter, Pageable pageable) {
-        workoutFilter.setOwnerId(CurrentUserProvider.getCurrentUserId());
-        return exericesService.getAllByOwnerId(workoutFilter, pageable);
+    public Page<ExerciseResponse> getAllWithFilters(ExerciseFilter exerciseFilter, Pageable pageable) {
+        exerciseFilter.setOwnerId(CurrentUserProvider.getCurrentUserId());
+        return exerciseService.getAllByOwnerId(exerciseFilter, pageable);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ExerciseDTO> getById(@PathVariable Long id) throws WorkoutNotFoundException {
-        return new ResponseEntity<>(exericesService.getById(id), HttpStatus.OK);
+    public ResponseEntity<ExerciseResponse> getById(@PathVariable Long id) throws WorkoutNotFoundException {
+        return new ResponseEntity<>(exerciseService.getById(id), HttpStatus.OK);
     }
     
     @PostMapping
-    public ResponseEntity<ExerciseDTO> create(@Valid @RequestBody ExerciseDTO workoutDTO) {
-        return new ResponseEntity<>(exericesService.save(workoutDTO), HttpStatus.CREATED);
+    public ResponseEntity<ExerciseResponse> create(@Valid @RequestBody ExerciseRequest exerciseDTO) {
+        return new ResponseEntity<>(exerciseService.save(exerciseDTO), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ExerciseDTO> update(
+    public ResponseEntity<ExerciseResponse> update(
                     @PathVariable Long id, 
-                    @Valid @RequestBody ExerciseDTO workoutDTO) throws WorkoutNotFoundException {
-        return ResponseEntity.ok(exericesService.update(id, workoutDTO));
+                    @Valid @RequestBody ExerciseRequest exerciseDTO) throws WorkoutNotFoundException {
+        return ResponseEntity.ok(exerciseService.update(id, exerciseDTO));
     }
     
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) throws WorkoutNotFoundException {
-        exericesService.delete(id);
+        exerciseService.delete(id);
         return ResponseEntity.noContent().build();
     }    
 }

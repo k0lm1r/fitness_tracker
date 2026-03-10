@@ -1,7 +1,5 @@
 package com.kolmir.fitness_tracker.dto.exercise;
 
-import java.util.Set;
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -10,9 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
-public class ExerciseDTO {
-    private Long id;
-
+public class ExerciseRequest {
     @NotNull(message = "id категории не может быть пустым")
     @Positive(message = "id категории должен быть больше 0")
     private Long categoryId;
@@ -24,6 +20,4 @@ public class ExerciseDTO {
     @NotNull(message = "длительность должна содержать значение")
     @Positive(message = "длительность тренировки должна быть больше 0")
     private Integer durationMinutes;
-
-    private Set<Long> workoutIds;
 }

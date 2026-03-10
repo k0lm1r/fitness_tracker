@@ -8,7 +8,8 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 
-import com.kolmir.fitness_tracker.dto.exercise.ExerciseDTO;
+import com.kolmir.fitness_tracker.dto.exercise.ExerciseRequest;
+import com.kolmir.fitness_tracker.dto.exercise.ExerciseResponse;
 import com.kolmir.fitness_tracker.models.Category;
 import com.kolmir.fitness_tracker.models.Exercise;
 import com.kolmir.fitness_tracker.models.Workout;
@@ -26,20 +27,23 @@ public abstract class ExerciseMapper {
     protected EntityManager entityManager;
 
     @Mapping(target = "categoryId", source = "category.id")
-    public abstract ExerciseDTO toDTO(Exercise exercise);
+    public abstract ExerciseResponse toResponse(Exercise exercise);
 
-    public abstract Exercise toEntity(ExerciseDTO exerciseDTO);
+    @Mapping(target = "categoryId", source = "category.id")
+    public abstract ExerciseRequest toRequest(Exercise exercise);
+
+    public abstract Exercise toEntity(ExerciseRequest exerciseRequest);
 
     @AfterMapping
-    protected void setCategory(ExerciseDTO exerciseDTO, @MappingTarget Exercise exercise) {
-        if (exerciseDTO.getCategoryId() != null)
-            exercise.setCategory(entityManager.getReference(Category.class, exerciseDTO.getCategoryId()));
+    protected void setCategory(ExerciseRequest exerciseRequest, @MappingTarget Exercise exercise) {
+        if (exerciseRequest.getCategoryId() != null)
+            exercise.setCategory(entityManager.getReference(Category.class, exerciseRequest.getCategoryId()));
     }
 
     @AfterMapping
-    protected void setExerciseIds(Exercise exercise, @MappingTarget ExerciseDTO exerciseDTO) {
+    protected void setWorkoutIds(Exercise exercise, @MappingTarget ExerciseResponse exerciseResponse) {
         if (exercise.getWorkouts() != null)
-            exerciseDTO.setWorkoutIds(
+            exerciseResponse.setWorkoutIds(
                 exercise.getWorkouts().stream()
                 .map(Workout::getId)
                 .collect(Collectors.toSet())

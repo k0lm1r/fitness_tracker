@@ -9,8 +9,8 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 
 import com.kolmir.fitness_tracker.models.User;
-import com.kolmir.fitness_tracker.dto.workout.WorkoutSetRequest;
-import com.kolmir.fitness_tracker.dto.workout.WorkoutSetResponse;
+import com.kolmir.fitness_tracker.dto.workout.WorkoutRequest;
+import com.kolmir.fitness_tracker.dto.workout.WorkoutResponse;
 import com.kolmir.fitness_tracker.models.Exercise;
 import com.kolmir.fitness_tracker.models.Workout;
 
@@ -28,22 +28,23 @@ public abstract class WorkoutMapper {
     @PersistenceContext
     protected EntityManager entityManager;
     
-    public abstract Workout toWorkoutSet(WorkoutSetRequest request);
+    public abstract Workout toWorkout(WorkoutRequest request);
 
     @Mapping(target = "ownerId", source = "owner.id")
-    public abstract WorkoutSetResponse toWorkoutSetResponse(Workout workoutSet);
+    public abstract WorkoutResponse toWorkoutResponse(Workout workout);
 
     @AfterMapping
-    protected void setOwnerAndWorkouts(WorkoutSetRequest request, @MappingTarget Workout workoutSet) {
-        workoutSet.setOwner(entityManager.getReference(User.class, request.getOwnerId()));
-        workoutSet.setExercises(request.getWorkoutIds().stream()
-            .map(workoutId -> entityManager.getReference(Exercise.class, workoutId))
-            .collect(Collectors.toSet())
-        );
+    protected void setOwnerAndExercises(WorkoutRequest request, @MappingTarget Workout workout) {
+        workout.setOwner(entityManager.getReference(User.class, request.getOwnerId()));
+        if (request.getExerciseIds() != null)
+            workout.setExercises(request.getExerciseIds().stream()
+                .map(exerciseId -> entityManager.getReference(Exercise.class, exerciseId))
+                .collect(Collectors.toSet())
+            );
     }
 
     @AfterMapping
-    protected void setWorkoutIds(Workout workout, @MappingTarget WorkoutSetResponse response) {
+    protected void setExerciseIds(Workout workout, @MappingTarget WorkoutResponse response) {
         if (workout.getExercises() != null)
             response.setExerciseIds(
                 workout.getExercises().stream()

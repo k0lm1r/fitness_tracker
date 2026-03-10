@@ -7,7 +7,7 @@ import lombok.Setter;
 
 
 @Getter @Setter
-public class WorkoutSetResponse {
+public class WorkoutResponse {
     private String name;
     private Long ownerId;
     private Set<Long> exerciseIds;
