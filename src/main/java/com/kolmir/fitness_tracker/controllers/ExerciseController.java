@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.kolmir.fitness_tracker.controllers.api.ExerciseApi;
 import com.kolmir.fitness_tracker.dto.exercise.ExerciseRequest;
 import com.kolmir.fitness_tracker.dto.exercise.ExerciseResponse;
 import com.kolmir.fitness_tracker.dto.exercise.ExerciseFilter;
-import com.kolmir.fitness_tracker.exceptions.WorkoutNotFoundException;
 import com.kolmir.fitness_tracker.security.CurrentUserProvider;
 import com.kolmir.fitness_tracker.services.ExerciseService;
 
@@ -27,7 +27,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/exercises")
-public class ExerciseController {
+public class ExerciseController implements ExerciseApi {
     private final ExerciseService exerciseService;
 
     @GetMapping
@@ -37,7 +37,7 @@ public class ExerciseController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ExerciseResponse> getById(@PathVariable Long id) throws WorkoutNotFoundException {
+    public ResponseEntity<ExerciseResponse> getById(@PathVariable Long id) {
         return new ResponseEntity<>(exerciseService.getById(id), HttpStatus.OK);
     }
     
@@ -49,12 +49,12 @@ public class ExerciseController {
     @PutMapping("/{id}")
     public ResponseEntity<ExerciseResponse> update(
                     @PathVariable Long id, 
-                    @Valid @RequestBody ExerciseRequest exerciseDTO) throws WorkoutNotFoundException {
+                    @Valid @RequestBody ExerciseRequest exerciseDTO) {
         return ResponseEntity.ok(exerciseService.update(id, exerciseDTO));
     }
     
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) throws WorkoutNotFoundException {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         exerciseService.delete(id);
         return ResponseEntity.noContent().build();
     }    

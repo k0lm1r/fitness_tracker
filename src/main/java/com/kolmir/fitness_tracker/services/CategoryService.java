@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.kolmir.fitness_tracker.dto.category.CategoryDTO;
-import com.kolmir.fitness_tracker.exceptions.CategoryNotFoundException;
+import com.kolmir.fitness_tracker.exceptions.NotFoundException;
 import com.kolmir.fitness_tracker.mappers.CategoryMapper;
 import com.kolmir.fitness_tracker.models.Category;
 import com.kolmir.fitness_tracker.repository.CategoryRepository;
@@ -21,6 +21,7 @@ public class CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
+    private final ExerciseService exerciseService;
 
     @Transactional(readOnly = true)
     public List<CategoryDTO> getAll() {
@@ -30,9 +31,9 @@ public class CategoryService {
 
     @Transactional(readOnly = true)
     @PreAuthorize("@categoryRepository.existsByIdAndOwnerId(#id, authentication.principal.id)")
-    public CategoryDTO getById(Long id) throws CategoryNotFoundException { 
+    public CategoryDTO getById(Long id) { 
         return categoryMapper.toDTO(categoryRepository.findById(id).orElseThrow(() -> 
-                    new CategoryNotFoundException("Категория с таким id не найдена")));
+                    new NotFoundException("Категория с таким id не найдена")));
     }
 
     @Transactional
@@ -44,21 +45,22 @@ public class CategoryService {
 
     @Transactional
     @PreAuthorize("@categoryRepository.existsByIdAndOwnerId(#id, authentication.principal.id)")
-    public CategoryDTO update(Long id, CategoryDTO categoryDTO) throws CategoryNotFoundException {
+    public CategoryDTO update(Long id, CategoryDTO categoryDTO) {
         Category category = categoryMapper.toEntity(categoryDTO);
         category.setId(id);
 
         if (!categoryRepository.existsById(id))
-            throw new CategoryNotFoundException("невозможно обновить несуществующую категорию");
+            throw new NotFoundException("невозможно обновить несуществующую категорию");
         
         return categoryMapper.toDTO(categoryRepository.save(category));
     }
 
     @Transactional
     @PreAuthorize("@categoryRepository.existsByIdAndOwnerId(#id, authentication.principal.id)")
-    public void delete(Long id) throws CategoryNotFoundException {
+    public void delete(Long id) {
         if (!categoryRepository.existsById(id))
-            throw new CategoryNotFoundException("невозможно удалить несуществующую категорию");
+            throw new NotFoundException("невозможно удалить несуществующую категорию");
+        exerciseService.invalidateCache();
         categoryRepository.deleteById(id);
     }
 }

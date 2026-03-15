@@ -1,11 +1,14 @@
 package com.kolmir.fitness_tracker.services;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.kolmir.fitness_tracker.models.User;
 import com.kolmir.fitness_tracker.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 
@@ -21,4 +24,15 @@ public class CustomUserDetailsService implements UserDetailsService {
                 () -> new UsernameNotFoundException("пользователь с таким именем не найден")
         );
     }
+
+    public Long getCurrentUserId() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    
+    if (authentication != null && authentication.getPrincipal() instanceof User) {
+        User user = (User) authentication.getPrincipal();
+        return user.getId();
+    }
+    
+    return null;
+}
 }

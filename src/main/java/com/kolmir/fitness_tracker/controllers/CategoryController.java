@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.kolmir.fitness_tracker.controllers.api.CategoryApi;
 import com.kolmir.fitness_tracker.dto.category.CategoryDTO;
-import com.kolmir.fitness_tracker.exceptions.CategoryNotFoundException;
 import com.kolmir.fitness_tracker.services.CategoryService;
 
 import jakarta.validation.Valid;
@@ -23,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/categories")
-public class CategoryController {
+public class CategoryController implements CategoryApi {
 
     private final CategoryService categoryService;
 
@@ -33,7 +33,7 @@ public class CategoryController {
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<CategoryDTO> getById(@PathVariable Long id) throws CategoryNotFoundException {
+    public ResponseEntity<CategoryDTO> getById(@PathVariable Long id) {
         return ResponseEntity.ok(categoryService.getById(id));
     }
 
@@ -46,14 +46,14 @@ public class CategoryController {
     @PutMapping("/{id}")
     public ResponseEntity<CategoryDTO> update(
                     @PathVariable Long id, 
-                    @Valid @RequestBody CategoryDTO categoryDTO) throws CategoryNotFoundException {
+                    @Valid @RequestBody CategoryDTO categoryDTO) {
         
         CategoryDTO updatedcategory = categoryService.update(id, categoryDTO);
         return ResponseEntity.ok(updatedcategory);
     }
     
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) throws CategoryNotFoundException {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         categoryService.delete(id);
         return ResponseEntity.noContent().build();
     }

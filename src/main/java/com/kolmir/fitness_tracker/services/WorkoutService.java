@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.kolmir.fitness_tracker.dto.workout.WorkoutRequest;
 import com.kolmir.fitness_tracker.dto.workout.WorkoutResponse;
-import com.kolmir.fitness_tracker.exceptions.WorkoutNotFoundException;
+import com.kolmir.fitness_tracker.exceptions.NotFoundException;
 import com.kolmir.fitness_tracker.mappers.ExerciseMapper;
 import com.kolmir.fitness_tracker.mappers.WorkoutMapper;
 import com.kolmir.fitness_tracker.models.Exercise;
@@ -33,11 +33,11 @@ public class WorkoutService {
                 .toList();
     }
 
-    public WorkoutResponse saveWithoutTransactional(WorkoutRequest request) throws WorkoutNotFoundException {
+    public WorkoutResponse saveWithoutTransactional(WorkoutRequest request) {
         Workout workout = workoutMapper.toWorkout(request);
         Set<Exercise> exercises = workout.getExercises();
         workout.setExercises(new HashSet<>());
-        workoutRepository.save(workout);
+        workout = workoutRepository.save(workout);
         
         for (var exercise : exercises) {
             exercise.getWorkouts().add(workout);
@@ -45,33 +45,35 @@ public class WorkoutService {
             exerciseService.update(exercise.getId(), exerciseMapper.toRequest(exercise));
         }
         
-        return workoutMapper.toWorkoutResponse(workoutRepository.save(workoutMapper.toWorkout(request)));
+        exerciseService.invalidateCache();
+        return workoutMapper.toWorkoutResponse(workoutRepository.save(workout));
     }
 
     @Transactional
-    public WorkoutResponse saveWithTransactional(WorkoutRequest request) throws WorkoutNotFoundException {
+    public WorkoutResponse saveWithTransactional(WorkoutRequest request) {
         return saveWithoutTransactional(request);
     }
 
     @Transactional
-    public void delete(Long id) throws WorkoutNotFoundException {
-        if (workoutRepository.existsById(id))
+    public void delete(Long id) {
+        if (workoutRepository.existsById(id)) {
+            exerciseService.invalidateCache();
             workoutRepository.deleteById(id);
-        else 
-            throw new WorkoutNotFoundException("тренировка с таким id не найдена");
+        } else 
+            throw new NotFoundException("тренировка с таким id не найдена");
     }
 
     @Transactional(readOnly = true)
-    public WorkoutResponse getById(Long id) throws WorkoutNotFoundException {
+    public WorkoutResponse getById(Long id) {
         return workoutMapper.toWorkoutResponse(workoutRepository.findById(id).orElseThrow(
-            () -> new WorkoutNotFoundException("тренировка с таким id не найдена")
+            () -> new NotFoundException("тренировка с таким id не найдена")
         ));
     }
 
     @Transactional
-    public WorkoutResponse update(Long id, WorkoutRequest request) throws WorkoutNotFoundException {
+    public WorkoutResponse update(Long id, WorkoutRequest request) {
         if (!workoutRepository.existsById(id))
-            throw new WorkoutNotFoundException("тренировка с таким id не найдена");
+            throw new NotFoundException("тренировка с таким id не найдена");
         
         Workout workout = workoutMapper.toWorkout(request);
         workout.setId(id);

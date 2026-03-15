@@ -6,13 +6,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.kolmir.fitness_tracker.controllers.api.AuthApi;
 import com.kolmir.fitness_tracker.dto.jwt.JwtResponse;
 import com.kolmir.fitness_tracker.dto.jwt.RefreshTokenRequest;
 import com.kolmir.fitness_tracker.dto.user.UserLoginRequest;
 import com.kolmir.fitness_tracker.dto.user.UserRegisterRequest;
-import com.kolmir.fitness_tracker.exceptions.EmailAlreadyInUseException;
-import com.kolmir.fitness_tracker.exceptions.JwtNotValidException;
-import com.kolmir.fitness_tracker.exceptions.UsernameAlreadyExistsException;
 import com.kolmir.fitness_tracker.services.AuthService;
 
 import jakarta.validation.Valid;
@@ -21,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
-public class AuthController {
+public class AuthController implements AuthApi {
 
     private final AuthService authService;
 
@@ -31,12 +29,12 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<JwtResponse> refreshToken(@RequestBody RefreshTokenRequest request) throws JwtNotValidException {
+    public ResponseEntity<JwtResponse> refreshToken(@RequestBody RefreshTokenRequest request) {
         return ResponseEntity.ok(authService.refreshToken(request));
     }
 
     @PostMapping("/register")
-    public ResponseEntity<JwtResponse> signup(@Valid @RequestBody UserRegisterRequest request) throws UsernameAlreadyExistsException, EmailAlreadyInUseException {
+    public ResponseEntity<JwtResponse> signup(@Valid @RequestBody UserRegisterRequest request) {
         return ResponseEntity.ok(authService.register(request));
     }
 }

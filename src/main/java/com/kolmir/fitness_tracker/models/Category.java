@@ -29,6 +29,6 @@ public class Category {
     @JoinColumn(name = "owner_id")
     private User owner;
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "category", cascade = {CascadeType.REMOVE, CascadeType.REFRESH})
     private List<Exercise> exercises;
 }
