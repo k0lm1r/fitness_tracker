@@ -9,6 +9,8 @@ import lombok.Setter;
 @Getter @Setter
 @Schema(description = "DTO категории упражнения")
 public class CategoryDTO {
+    @Schema(description = "Идентификатор категории", example = "3", accessMode = Schema.AccessMode.READ_ONLY)
+    private Long id;
 
     @Schema(description = "Название категории", example = "Кардио")
     @NotBlank(message = "название категории не может быть пустым")

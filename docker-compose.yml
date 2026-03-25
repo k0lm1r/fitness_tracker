@@ -76,7 +76,10 @@ services:
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
       MINIO_BUCKET: files
+    volumes:
+      - ./app-logs:/app/logs
 
 volumes:
   minio-data: 
   postgres_data:
+  app-logs:

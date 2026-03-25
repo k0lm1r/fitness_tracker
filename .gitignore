@@ -6,7 +6,8 @@ target/
 !**/src/test/**/target/
 src/main/resources/application.properties
 META-INF
-*.env
+app-logs
+.env
 
 ### VS Code ###
 .vscode/

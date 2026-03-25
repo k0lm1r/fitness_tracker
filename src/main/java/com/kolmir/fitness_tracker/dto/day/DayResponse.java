@@ -10,6 +10,9 @@ import lombok.Setter;
 @Getter @Setter
 @Schema(description = "Ответ с данными тренировочного дня")
 public class DayResponse {
+    @Schema(description = "Идентификатор записи дня", example = "12")
+    private Long id;
+
     @Schema(description = "Дата тренировки", example = "2026-03-16")
     private LocalDate date;
 

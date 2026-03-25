@@ -4,6 +4,7 @@ import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.ReportingPolicy;
 
 import com.kolmir.fitness_tracker.dto.category.CategoryDTO;
 import com.kolmir.fitness_tracker.models.Category;
@@ -12,7 +13,10 @@ import com.kolmir.fitness_tracker.models.User;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
-@Mapper(componentModel = "spring")
+@Mapper(
+    componentModel = "spring",
+    unmappedTargetPolicy = ReportingPolicy.IGNORE
+)
 public abstract class CategoryMapper {
     @PersistenceContext
     protected EntityManager entityManager;

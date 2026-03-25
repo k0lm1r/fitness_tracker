@@ -7,6 +7,9 @@ import lombok.Setter;
 @Getter @Setter
 @Schema(description = "Ответ после загрузки изображения")
 public class ImageResponce {
+    @Schema(description = "Идентификатор изображения", example = "15")
+    private Long id;
+
     @Schema(description = "Имя файла", example = "2026-03-16T10:15:30.png")
     private String filename;
 

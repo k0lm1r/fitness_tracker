@@ -10,7 +10,7 @@ import com.kolmir.fitness_tracker.models.Exercise;
 
 @Repository
 public interface ExerciseRepository extends JpaRepository<Exercise, Long>, 
-                JpaSpecificationExecutor<Exercise> {
+                JpaSpecificationExecutor<Exercise>, CustomExerciseRepository {
     
     @Query("""
         select case when count(e) > 0 then true else false end 

@@ -2,9 +2,7 @@ package com.kolmir.fitness_tracker.aop;
 
 import java.util.Arrays;
 
-import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
@@ -18,8 +16,10 @@ import org.springframework.web.multipart.MultipartFile;
 public class LoggingAspect {
 
     @Pointcut("within(com.kolmir.fitness_tracker.controllers..*) || within(com.kolmir.fitness_tracker.services..*)")
-    public void applicationLayer() {
-    }
+    public void applicationLayer() {}
+
+    @Pointcut("within(com.kolmir.fitness_tracker.exceptions.FitnessTrackerExceptionHandler)")
+    public void exceptionHandler() {}
 
     @Around("applicationLayer()")
     public Object logExecution(ProceedingJoinPoint joinPoint) throws Throwable {
@@ -31,19 +31,19 @@ public class LoggingAspect {
         }
 
         long startedAt = System.currentTimeMillis();
-        Object result = joinPoint.proceed();
+        Object result = null;
+        try {
+            result = joinPoint.proceed();
+        } catch(Throwable t) {
+            logger.error("-> {} exception={}", methodName, t);
+            throw t;
+        }
 
         if (logger.isDebugEnabled()) {
             logger.debug("<- {} completed in {} ms", methodName, System.currentTimeMillis() - startedAt);
         }
 
         return result;
-    }
-
-    @AfterThrowing(pointcut = "applicationLayer()", throwing = "exception")
-    public void logError(JoinPoint joinPoint, Throwable exception) {
-        Logger logger = LoggerFactory.getLogger(joinPoint.getTarget().getClass());
-        logger.error("xx {} failed: {}", joinPoint.getSignature().toShortString(), exception.getMessage(), exception);
     }
 
     private String formatArgs(Object[] args) {
