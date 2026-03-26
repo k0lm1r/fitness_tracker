@@ -159,4 +159,22 @@ class WorkoutServiceTest {
         assertEquals(1, result.size());
         assertEquals(response, result.getFirst());
     }
+
+    @Test
+    void saveWithTransactionalDelegatesToSaveWithoutTransactional() {
+        WorkoutRequest request = new WorkoutRequest();
+        WorkoutResponse response = new WorkoutResponse();
+
+        Workout workout = new Workout();
+        workout.setExercises(new HashSet<>());
+
+        when(workoutMapper.toWorkout(request)).thenReturn(workout);
+        when(workoutRepository.save(any(Workout.class))).thenReturn(workout);
+        when(workoutMapper.toWorkoutResponse(workout)).thenReturn(response);
+
+        WorkoutResponse result = workoutService.saveWithTransactional(request);
+
+        assertEquals(response, result);
+        verify(workoutRepository, times(2)).save(any(Workout.class));
+    }
 }

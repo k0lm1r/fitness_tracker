@@ -202,6 +202,35 @@
 						<goals>
 							<goal>report</goal>
 						</goals>
+						<configuration>
+							<includes>
+								<include>com/kolmir/fitness_tracker/services/*</include>
+							</includes>
+						</configuration>
+					</execution>
+					<execution>
+						<id>check</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<configuration>
+							<includes>
+								<include>com/kolmir/fitness_tracker/services/*</include>
+							</includes>
+							<rules>
+								<rule>
+									<element>BUNDLE</element>
+									<limits>
+										<limit>
+											<counter>LINE</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>1.00</minimum>
+										</limit>
+									</limits>
+								</rule>
+							</rules>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>

@@ -238,7 +238,6 @@ class ExerciseServiceTest {
         response.setId(1L);
 
         when(exerciseMapper.toEntity(request)).thenReturn(exercise);
-        when(exerciseRepository.banchSave(List.of(exercise))).thenReturn(List.of(exercise));
         when(exerciseMapper.toResponse(exercise)).thenReturn(response);
         AsyncTaskCreateResponse created = exerciseService.startBulkSaveTask(List.of(request));
         AsyncTaskStatusResponse status = exerciseService.getTaskStatus(created.getTaskId());
@@ -255,6 +254,25 @@ class ExerciseServiceTest {
         assertEquals("COMPLETED", status.getStatus());
         assertEquals(1, status.getProcessedCount());
         assertEquals(1, status.getCompletedTasksTotal());
+    }
+
+    @Test
+    void executeBulkSaveTaskReturnsWhenTaskMissing() {
+        exerciseService.executeBulkSaveTask("missing-task-id", List.of(new ExerciseRequest()));
+
+        verify(exerciseRepository, never()).save(any(Exercise.class));
+    }
+
+    @Test
+    void executeBulkSaveTaskMarksFailedWhenProcessingThrows() {
+        ExerciseRequest request = new ExerciseRequest();
+        when(exerciseMapper.toEntity(request)).thenThrow(new RuntimeException("boom"));
+
+        AsyncTaskCreateResponse created = exerciseService.startBulkSaveTask(List.of(request));
+        AsyncTaskStatusResponse status = exerciseService.getTaskStatus(created.getTaskId());
+
+        assertEquals("FAILED", status.getStatus());
+        assertEquals("boom", status.getErrorMessage());
     }
 
 }
