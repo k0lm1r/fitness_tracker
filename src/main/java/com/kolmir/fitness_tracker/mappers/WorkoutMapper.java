@@ -8,7 +8,6 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 
-import com.kolmir.fitness_tracker.models.User;
 import com.kolmir.fitness_tracker.dto.workout.WorkoutRequest;
 import com.kolmir.fitness_tracker.dto.workout.WorkoutResponse;
 import com.kolmir.fitness_tracker.models.Exercise;
@@ -34,8 +33,7 @@ public abstract class WorkoutMapper {
     public abstract WorkoutResponse toWorkoutResponse(Workout workout);
 
     @AfterMapping
-    protected void setOwnerAndExercises(WorkoutRequest request, @MappingTarget Workout workout) {
-        workout.setOwner(entityManager.getReference(User.class, request.getOwnerId()));
+    protected void setExercises(WorkoutRequest request, @MappingTarget Workout workout) {
         if (request.getExerciseIds() != null)
             workout.setExercises(request.getExerciseIds().stream()
                 .map(exerciseId -> entityManager.getReference(Exercise.class, exerciseId))

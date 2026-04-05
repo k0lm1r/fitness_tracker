@@ -2,8 +2,9 @@
 
 В папке лежат два независимых плана:
 
-- `all_endpoints_no_race_condition.jmx` - прогон всех endpoint-ов, кроме `/race-condition/demo`.
+- `all_endpoints.jmx` - прогон всех endpoint-ов, кроме `/race-condition/demo`.
 - `race_condition_only.jmx` - нагрузка только на `/race-condition/demo`.
+Оба плана выполняют регистрацию/логин и автоматически подставляют `Authorization: Bearer ...` для защищённых endpoint-ов.
 
 ## Что нужно перед запуском
 
@@ -22,10 +23,9 @@
 ## Примеры запуска
 
 ```bash
-jmeter -n -t jmeter/all_endpoints_no_race_condition.jmx -l jmeter/results/all_endpoints.jtl
+jmeter -n -t jmeter/all_endpoints.jmx -l jmeter/results/all_endpoints.jtl
 ```
 
 ```bash
 jmeter -n -t jmeter/race_condition_only.jmx -l jmeter/results/race_only.jtl -JraceUsers=100 -JraceLoops=20
 ```
-

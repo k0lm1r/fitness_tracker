@@ -19,7 +19,4 @@ public class WorkoutRequest {
 
     @Schema(description = "Идентификаторы упражнений тренировки")
     private Set<Long> exerciseIds;
-
-    @Schema(description = "Идентификатор владельца тренировки", example = "1", accessMode = Schema.AccessMode.READ_ONLY)
-    private Long ownerId;
 }

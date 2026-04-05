@@ -26,7 +26,9 @@ import com.kolmir.fitness_tracker.exceptions.NotFoundException;
 import com.kolmir.fitness_tracker.mappers.ExerciseMapper;
 import com.kolmir.fitness_tracker.mappers.WorkoutMapper;
 import com.kolmir.fitness_tracker.models.Exercise;
+import com.kolmir.fitness_tracker.models.User;
 import com.kolmir.fitness_tracker.models.Workout;
+import com.kolmir.fitness_tracker.repository.UserRepository;
 import com.kolmir.fitness_tracker.repository.WorkoutRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,6 +45,12 @@ class WorkoutServiceTest {
 
     @Mock
     private ExerciseMapper exerciseMapper;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private CustomUserDetailsService userDetailsService;
 
     @InjectMocks
     private WorkoutService workoutService;
@@ -62,8 +70,12 @@ class WorkoutServiceTest {
 
         Workout workout = new Workout();
         workout.setExercises(exercises);
+        User currentUser = new User();
+        currentUser.setId(5L);
 
         when(workoutMapper.toWorkout(request)).thenReturn(workout);
+        when(userDetailsService.getCurrentUserId()).thenReturn(5L);
+        when(userRepository.getReferenceById(5L)).thenReturn(currentUser);
         when(workoutRepository.save(any(Workout.class))).thenAnswer(invocation -> {
             Workout argument = invocation.getArgument(0);
             if (argument.getId() == null) {
@@ -116,9 +128,13 @@ class WorkoutServiceTest {
         WorkoutRequest request = new WorkoutRequest();
         Workout workout = new Workout();
         WorkoutResponse response = new WorkoutResponse();
+        User currentUser = new User();
+        currentUser.setId(9L);
 
         when(workoutRepository.existsById(89L)).thenReturn(true);
         when(workoutMapper.toWorkout(request)).thenReturn(workout);
+        when(userDetailsService.getCurrentUserId()).thenReturn(9L);
+        when(userRepository.getReferenceById(9L)).thenReturn(currentUser);
         when(workoutRepository.save(workout)).thenReturn(workout);
         when(workoutMapper.toWorkoutResponse(workout)).thenReturn(response);
 
@@ -167,8 +183,12 @@ class WorkoutServiceTest {
 
         Workout workout = new Workout();
         workout.setExercises(new HashSet<>());
+        User currentUser = new User();
+        currentUser.setId(10L);
 
         when(workoutMapper.toWorkout(request)).thenReturn(workout);
+        when(userDetailsService.getCurrentUserId()).thenReturn(10L);
+        when(userRepository.getReferenceById(10L)).thenReturn(currentUser);
         when(workoutRepository.save(any(Workout.class))).thenReturn(workout);
         when(workoutMapper.toWorkoutResponse(workout)).thenReturn(response);
 

@@ -14,6 +14,7 @@ import com.kolmir.fitness_tracker.mappers.ExerciseMapper;
 import com.kolmir.fitness_tracker.mappers.WorkoutMapper;
 import com.kolmir.fitness_tracker.models.Exercise;
 import com.kolmir.fitness_tracker.models.Workout;
+import com.kolmir.fitness_tracker.repository.UserRepository;
 import com.kolmir.fitness_tracker.repository.WorkoutRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,8 @@ public class WorkoutService {
     private final ExerciseService exerciseService;
     private final WorkoutMapper workoutMapper;
     private final ExerciseMapper exerciseMapper;
+    private final UserRepository userRepository;
+    private final CustomUserDetailsService userDetailsService;
 
     @Transactional
     public List<WorkoutResponse> getAll() {
@@ -35,6 +38,7 @@ public class WorkoutService {
 
     public WorkoutResponse saveWithoutTransactional(WorkoutRequest request) {
         Workout workout = workoutMapper.toWorkout(request);
+        workout.setOwner(userRepository.getReferenceById(userDetailsService.getCurrentUserId()));
         Set<Exercise> exercises = workout.getExercises();
         workout.setExercises(new HashSet<>());
         workout = workoutRepository.save(workout);
@@ -77,6 +81,7 @@ public class WorkoutService {
         
         Workout workout = workoutMapper.toWorkout(request);
         workout.setId(id);
+        workout.setOwner(userRepository.getReferenceById(userDetailsService.getCurrentUserId()));
         return workoutMapper.toWorkoutResponse(workoutRepository.save(workout));
     }
 }

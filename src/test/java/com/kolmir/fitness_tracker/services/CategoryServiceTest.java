@@ -23,6 +23,7 @@ import com.kolmir.fitness_tracker.exceptions.NotFoundException;
 import com.kolmir.fitness_tracker.mappers.CategoryMapper;
 import com.kolmir.fitness_tracker.models.Category;
 import com.kolmir.fitness_tracker.repository.CategoryRepository;
+import com.kolmir.fitness_tracker.repository.UserRepository;
 import com.kolmir.fitness_tracker.security.CurrentUserProvider;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,6 +37,9 @@ class CategoryServiceTest {
 
     @Mock
     private ExerciseService exerciseService;
+
+    @Mock
+    private UserRepository userRepository;
 
     @InjectMocks
     private CategoryService categoryService;
@@ -84,16 +88,18 @@ class CategoryServiceTest {
 
         Category category = new Category();
         CategoryDTO response = new CategoryDTO();
+        var owner = new com.kolmir.fitness_tracker.models.User();
+        owner.setId(5L);
 
         try (MockedStatic<CurrentUserProvider> currentUser = mockStatic(CurrentUserProvider.class)) {
             currentUser.when(CurrentUserProvider::getCurrentUserId).thenReturn(5L);
             when(categoryMapper.toEntity(request)).thenReturn(category);
+            when(userRepository.getReferenceById(5L)).thenReturn(owner);
             when(categoryRepository.save(category)).thenReturn(category);
             when(categoryMapper.toDTO(category)).thenReturn(response);
 
             CategoryDTO result = categoryService.save(request);
 
-            assertEquals(5L, request.getOwnerId());
             assertEquals(response, result);
             verify(categoryRepository).save(category);
         }
@@ -102,9 +108,6 @@ class CategoryServiceTest {
     @Test
     void updateThrowsWhenCategoryMissing() {
         CategoryDTO request = new CategoryDTO();
-        Category category = new Category();
-
-        when(categoryMapper.toEntity(request)).thenReturn(category);
         when(categoryRepository.existsById(100L)).thenReturn(false);
 
         assertThrows(NotFoundException.class, () -> categoryService.update(100L, request));
@@ -116,16 +119,22 @@ class CategoryServiceTest {
         CategoryDTO request = new CategoryDTO();
         Category category = new Category();
         CategoryDTO response = new CategoryDTO();
+        var owner = new com.kolmir.fitness_tracker.models.User();
+        owner.setId(13L);
 
-        when(categoryMapper.toEntity(request)).thenReturn(category);
-        when(categoryRepository.existsById(13L)).thenReturn(true);
-        when(categoryRepository.save(category)).thenReturn(category);
-        when(categoryMapper.toDTO(category)).thenReturn(response);
+        try (MockedStatic<CurrentUserProvider> currentUser = mockStatic(CurrentUserProvider.class)) {
+            currentUser.when(CurrentUserProvider::getCurrentUserId).thenReturn(13L);
+            when(categoryMapper.toEntity(request)).thenReturn(category);
+            when(categoryRepository.existsById(13L)).thenReturn(true);
+            when(userRepository.getReferenceById(13L)).thenReturn(owner);
+            when(categoryRepository.save(category)).thenReturn(category);
+            when(categoryMapper.toDTO(category)).thenReturn(response);
 
-        CategoryDTO result = categoryService.update(13L, request);
+            CategoryDTO result = categoryService.update(13L, request);
 
-        assertEquals(13L, category.getId());
-        assertEquals(response, result);
+            assertEquals(13L, category.getId());
+            assertEquals(response, result);
+        }
     }
 
     @Test

@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -33,6 +34,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class ExerciseService {
+    private final ApplicationContext applicationContext;
     private final ExerciseRepository exerciseRepository;
     private final ExerciseMapper exerciseMapper;
     private final ExerciseCache cache;
@@ -126,7 +128,7 @@ public class ExerciseService {
         AsyncTaskState state = new AsyncTaskState(taskId);
         asyncTasks.put(taskId, state);
 
-        executeBulkSaveTask(taskId, requests);
+        applicationContext.getBean(ExerciseService.class).executeBulkSaveTask(taskId, requests);
 
         return new AsyncTaskCreateResponse(taskId);
     }
@@ -147,9 +149,12 @@ public class ExerciseService {
 
         if (state == null)
             return;
-
         state.markRunning();
-
+        
+        try {
+            Thread.sleep(20000, 0);
+        } catch (InterruptedException e) {
+        }
         try {
             List<ExerciseResponse> responses = saveAllWithoutTransactional(requests);
 

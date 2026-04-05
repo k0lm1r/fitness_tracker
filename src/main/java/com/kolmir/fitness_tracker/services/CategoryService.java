@@ -11,6 +11,7 @@ import com.kolmir.fitness_tracker.exceptions.NotFoundException;
 import com.kolmir.fitness_tracker.mappers.CategoryMapper;
 import com.kolmir.fitness_tracker.models.Category;
 import com.kolmir.fitness_tracker.repository.CategoryRepository;
+import com.kolmir.fitness_tracker.repository.UserRepository;
 import com.kolmir.fitness_tracker.security.CurrentUserProvider;
 
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class CategoryService {
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
     private final ExerciseService exerciseService;
+    private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
     public List<CategoryDTO> getAll() {
@@ -38,20 +40,21 @@ public class CategoryService {
 
     @Transactional
     public CategoryDTO save(CategoryDTO categoryDTO) {
-        categoryDTO.setOwnerId(CurrentUserProvider.getCurrentUserId());
         Category category = categoryMapper.toEntity(categoryDTO);
+        category.setOwner(userRepository.getReferenceById(CurrentUserProvider.getCurrentUserId()));
         return categoryMapper.toDTO(categoryRepository.save(category));
     }
 
     @Transactional
     @PreAuthorize("@categoryRepository.existsByIdAndOwnerId(#id, authentication.principal.id)")
     public CategoryDTO update(Long id, CategoryDTO categoryDTO) {
-        Category category = categoryMapper.toEntity(categoryDTO);
-        category.setId(id);
-
         if (!categoryRepository.existsById(id))
             throw new NotFoundException("невозможно обновить несуществующую категорию");
-        
+
+        Category category = categoryMapper.toEntity(categoryDTO);
+        category.setId(id);
+        category.setOwner(userRepository.getReferenceById(CurrentUserProvider.getCurrentUserId()));
+
         return categoryMapper.toDTO(categoryRepository.save(category));
     }
 

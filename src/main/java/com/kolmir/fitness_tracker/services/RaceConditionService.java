@@ -52,10 +52,7 @@ public class RaceConditionService {
                     try {
                         startLatch.await();
                         for (int j = 0; j < incrementsPerThread; j++) {
-                            int current = unsafeCounter[0];
-                            if ((j & 63) == 0)
-                                Thread.yield();
-                            unsafeCounter[0] = current + 1;
+                            unsafeCounter[0]++;
                             atomicCounter.incrementAndGet();
                         }
                     } catch (InterruptedException e) {
