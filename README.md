@@ -53,9 +53,14 @@
 ### Через Docker Compose
 1. Собрать и поднять сервисы: 
    <code>docker compose up --build -d</code>
-2. Проверить логи backend: 
+2. Фронтенд доступен по адресу:
+   <code>http://localhost:3000</code>
+3. API доступен:
+   - через frontend proxy: <code>http://localhost:3000/api</code>
+   - напрямую backend: <code>http://localhost:8080</code>
+4. Проверить логи backend: 
    <code>docker compose logs -f backend</code>
-3. Остановить и удалить контейнеры: 
+5. Остановить и удалить контейнеры: 
    <code>docker compose down -v</code>
 
 ### Локально (без контейнера)

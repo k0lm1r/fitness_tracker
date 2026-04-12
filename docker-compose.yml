@@ -79,6 +79,14 @@ services:
     volumes:
       - ./app-logs:/app/logs
 
+  frontend:
+    build: ./frontend
+    container_name: app-frontend
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+
 volumes:
   minio-data: 
   postgres_data:
