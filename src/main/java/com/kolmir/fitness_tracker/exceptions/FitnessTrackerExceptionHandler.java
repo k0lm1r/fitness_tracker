@@ -7,16 +7,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class FitnessTrackerExceptionHandler {
-    @ExceptionHandler(WorkoutNotFoundException.class)
-    ResponseEntity<ErrorResponse> handleWorkoutNotFoundException(WorkoutNotFoundException e) {
+    @ExceptionHandler(FitnessTrackerException.class)
+    ResponseEntity<ErrorResponse> handleApiException(FitnessTrackerException e) {
         ErrorResponse errorResponse = new ErrorResponse(e.getMessage(), LocalDateTime.now());
-        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(errorResponse, e.getStatus());
     }
 
     @ExceptionHandler(BadCredentialsException.class)
@@ -31,27 +32,21 @@ public class FitnessTrackerExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
     }
 
-    @ExceptionHandler(UsernameAlreadyExistsException.class)
-    public ResponseEntity<ErrorResponse> handleUsernameAlreadyExistsException(UsernameAlreadyExistsException e) {
-        ErrorResponse errorResponse = new ErrorResponse(e.getMessage(), LocalDateTime.now());
-        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
-    }
-
-    @ExceptionHandler(EmailAlreadyInUseException.class)
-    public ResponseEntity<ErrorResponse> handleEmailAlreadyInUserException(EmailAlreadyInUseException e) {
-        ErrorResponse errorResponse = new ErrorResponse(e.getMessage(), LocalDateTime.now());
-        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
-    }
-    
-    @ExceptionHandler(CategoryNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleCategoryNotFoundException(CategoryNotFoundException e) {
-        ErrorResponse errorResponse = new ErrorResponse(e.getMessage(), LocalDateTime.now());
-        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
-    }
-
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleCategoryNotValidException(CategoryNotValidException e) {
-        ErrorResponse errorResponse = new ErrorResponse(e.getMessage(), LocalDateTime.now());
+    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                ErrorResponse.getExceptionMessage(e.getBindingResult()),
+                LocalDateTime.now()
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(BindException.class)
+    public ResponseEntity<ErrorResponse> handleBindException(BindException e) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                ErrorResponse.getExceptionMessage(e.getBindingResult()),
+                LocalDateTime.now()
+        );
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 

@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Фитнес-трекер</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="container">
+    <section id="authScreen" class="auth-shell">
+      <div class="brand">
+        <h1>Фитнес-трекер</h1>
+        <p>Планируйте тренировки, управляйте упражнениями и смотрите историю занятий по дням.</p>
+      </div>
+
+      <div class="auth-card">
+        <div class="auth-tabs">
+          <button id="showLoginBtn" class="tab-btn active" type="button">Вход</button>
+          <button id="showRegisterBtn" class="tab-btn" type="button">Регистрация</button>
+        </div>
+        <div id="authNotice" class="notice hidden"></div>
+
+        <form id="loginForm" class="form active">
+          <h2>Вход</h2>
+          <label>Имя пользователя
+            <input name="username" required>
+          </label>
+          <label>Пароль
+            <input name="password" type="password" required minlength="4">
+          </label>
+          <button type="submit">Войти</button>
+        </form>
+
+        <form id="registerForm" class="form">
+          <h2>Регистрация</h2>
+          <label>Имя пользователя
+            <input name="username" required minlength="3">
+          </label>
+          <label>Электронная почта
+            <input name="email" type="email" required>
+          </label>
+          <label>Пароль
+            <input name="password" type="password" required minlength="4">
+          </label>
+          <button type="submit">Создать аккаунт</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="appScreen" class="app-shell hidden">
+      <header class="topbar">
+        <div>
+          <h2>Личный кабинет</h2>
+          <p class="muted">Управление категориями, упражнениями, тренировками и расписанием</p>
+        </div>
+        <button id="logoutBtn" class="secondary" type="button">Выйти</button>
+      </header>
+
+      <div id="notice" class="notice hidden"></div>
+
+      <nav class="section-tabs">
+        <button class="section-tab active" data-section="categories" type="button">Категории</button>
+        <button class="section-tab" data-section="exercises" type="button">Упражнения</button>
+        <button class="section-tab" data-section="workouts" type="button">Тренировки</button>
+        <button class="section-tab" data-section="schedule" type="button">Календарь</button>
+        <button class="section-tab" data-section="media" type="button">Медиа</button>
+      </nav>
+
+      <section id="section-categories" class="panel section active">
+        <div class="section-head">
+          <h3>Категории</h3>
+          <button id="openCategoryModalBtn" type="button">Добавить категорию</button>
+        </div>
+        <div id="categoriesList" class="cards"></div>
+      </section>
+
+      <section id="section-exercises" class="panel section">
+        <div class="section-head">
+          <h3>Упражнения</h3>
+          <button id="openExerciseModalBtn" type="button">Добавить упражнение</button>
+        </div>
+        <form id="exerciseFilterForm" class="inline-form wrap compact">
+          <input name="name" placeholder="Поиск по названию">
+          <select name="categoryId" id="exerciseFilterCategorySelect">
+            <option value="">Все категории</option>
+          </select>
+          <input name="durationMinutes" type="number" placeholder="Минуты" min="1">
+          <button type="submit">Применить</button>
+          <button id="clearExerciseFilterBtn" class="secondary" type="button">Сбросить</button>
+        </form>
+        <div id="exercisesList" class="cards"></div>
+        <div class="pagination">
+          <button id="prevExercisesBtn" class="secondary" type="button">Назад</button>
+          <span id="exercisesPageInfo">Страница 1 / 1</span>
+          <button id="nextExercisesBtn" class="secondary" type="button">Вперед</button>
+        </div>
+      </section>
+
+      <section id="section-workouts" class="panel section">
+        <div class="section-head">
+          <h3>Тренировки</h3>
+          <button id="openWorkoutModalBtn" type="button">Добавить тренировку</button>
+        </div>
+        <div id="workoutsList" class="cards"></div>
+      </section>
+
+      <section id="section-schedule" class="panel section">
+        <div class="section-head">
+          <h3>Календарь тренировок</h3>
+          <button id="openDayModalBtn" type="button">Добавить день</button>
+        </div>
+        <div id="daysList" class="cards"></div>
+      </section>
+
+      <section id="section-media" class="panel section">
+        <h3>Загрузка изображения</h3>
+        <form id="mediaForm" class="inline-form wrap">
+          <input id="mediaFileInput" class="hidden-file-input" name="file" type="file" accept="image/*" required>
+          <button id="pickMediaFileBtn" class="secondary" type="button">Выбрать файл</button>
+          <span id="mediaFileName" class="muted">Файл не выбран</span>
+          <button type="submit">Загрузить</button>
+        </form>
+        <div id="mediaResult" class="media-result muted">Файл еще не загружен.</div>
+      </section>
+
+    </section>
+  </main>
+
+  <div id="entityModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="entityModalTitle">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 id="entityModalTitle">Форма</h3>
+        <button id="closeEntityModalBtn" class="secondary" type="button">Закрыть</button>
+      </div>
+
+      <form id="categoryForm" class="modal-form hidden">
+        <label>Название категории
+          <input name="name" placeholder="Новая категория" required maxlength="50">
+        </label>
+        <button id="categorySubmitBtn" type="submit">Сохранить</button>
+      </form>
+
+      <form id="exerciseForm" class="modal-form hidden">
+        <label>Название упражнения
+          <input name="name" placeholder="Название упражнения" required maxlength="100">
+        </label>
+        <label>Длительность (мин)
+          <input name="durationMinutes" type="number" placeholder="Длительность (мин)" required min="1">
+        </label>
+        <label>Категория
+          <select name="categoryId" required id="exerciseCategorySelect"></select>
+        </label>
+        <button id="exerciseSubmitBtn" type="submit">Сохранить</button>
+      </form>
+
+      <form id="workoutForm" class="modal-form hidden">
+        <label>Название тренировки
+          <input name="name" placeholder="Название тренировки" required maxlength="100">
+        </label>
+        <p class="muted">Упражнения</p>
+        <div id="workoutExerciseChoices" class="choice-grid"></div>
+        <button id="workoutSubmitBtn" type="submit">Сохранить</button>
+      </form>
+
+      <form id="dayForm" class="modal-form hidden">
+        <label>Дата
+          <input name="dateDisplay" placeholder="дд/мм/гггг" readonly required>
+        </label>
+        <input id="dayCalendarInput" class="hidden-file-input" name="dateCalendar" type="date" tabindex="-1" aria-hidden="true" lang="ru">
+        <label>Тренировка
+          <select name="workoutId" required id="dayWorkoutSelect"></select>
+        </label>
+        <label>Калории
+          <input name="calories" type="number" min="1" placeholder="Калории" required>
+        </label>
+        <button id="daySubmitBtn" type="submit">Сохранить</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>

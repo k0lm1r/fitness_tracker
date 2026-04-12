@@ -1,42 +1,54 @@
 package com.kolmir.fitness_tracker.models;
 
-import java.time.LocalDateTime;
+import java.util.Set;
 
-import jakarta.persistence.Column;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.persistence.UniqueConstraint;
+import lombok.Data;
 
+
+@Data
 @Entity
-@Getter @Setter
 @Table(name = "workouts")
 public class Workout {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "category_id")
-    private Category category;   
-    
+
     private String name;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "owner_id")
     private User owner;
 
-    @Column(name = "workout_date")
-    private LocalDateTime workoutDate;
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable (
+        name = "workout_exercises",
+        joinColumns = @JoinColumn(name = "workout_id"),
+        inverseJoinColumns = @JoinColumn(name = "exercise_id"),
+        uniqueConstraints = @UniqueConstraint (
+            columnNames = {"workout_id", "exercise_id"}
+        )
+    )
+    private Set<Exercise> exercises;
 
-    @Column(name = "duration_minutes")
-    private Integer durationMinutes;
-
-    private Integer calories;
+    @ManyToMany(cascade = {CascadeType.PERSIST})
+    @JoinTable (
+        name = "workout_days",
+        joinColumns = @JoinColumn(name = "workout_id"),
+        inverseJoinColumns = @JoinColumn(name = "day_id"),
+        uniqueConstraints = @UniqueConstraint (
+            columnNames = {"workout_id", "day_id"}
+        )
+    )
+    private Set<DayOfWeekEntity> days;
 }

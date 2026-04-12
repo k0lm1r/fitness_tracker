@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.0.1</version>
+		<version>4.0.4</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	
@@ -17,9 +17,9 @@
 	<description>Backend for fitness tracker</description>
 	
 	<properties>
-		<maven.compiler.source>21</maven.compiler.source>
-    	<maven.compiler.target>21</maven.compiler.target>
-		<java.version>17</java.version>
+		<maven.compiler.source>25</maven.compiler.source>
+    	<maven.compiler.target>25</maven.compiler.target>
+		<java.version>25</java.version>
 		<jwt.version>0.13.0</jwt.version>
 	</properties>
 	
@@ -165,7 +165,6 @@
 					<consoleOutput>true</consoleOutput>
 					<failsOnError>true</failsOnError>
 					<linkXRef>false</linkXRef>
-					<suppressionsLocation>checkstyle/checkstyle-suppressions.xml</suppressionsLocation>
 					<suppressionsFileExpression>org.checkstyle.google.suppressionfilter.config</suppressionsFileExpression>
 				</configuration>
 				<executions>
@@ -184,6 +183,55 @@
 						<version>10.12.5</version>
 					</dependency>
 				</dependencies>
+			</plugin>
+
+			<plugin>
+            <groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.14</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+						<configuration>
+							<includes>
+								<include>com/kolmir/fitness_tracker/services/*</include>
+							</includes>
+						</configuration>
+					</execution>
+					<execution>
+						<id>check</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<configuration>
+							<includes>
+								<include>com/kolmir/fitness_tracker/services/*</include>
+							</includes>
+							<rules>
+								<rule>
+									<element>BUNDLE</element>
+									<limits>
+										<limit>
+											<counter>LINE</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>1.00</minimum>
+										</limit>
+									</limits>
+								</rule>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

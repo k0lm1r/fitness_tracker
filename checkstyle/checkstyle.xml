@@ -5,7 +5,7 @@
 <module name="Checker">
   <module name="SuppressWarningsFilter"/>
   <property name="charset" value="UTF-8"/>
-  <property name="severity" value="warning"/>
+  <property name="severity" value="error"/>
   <property name="fileExtensions" value="java, properties, xml"/>
   
   <module name="BeforeExecutionExclusionFileFilter">
@@ -16,10 +16,6 @@
     <property name="file" value="${org.checkstyle.google.suppressionfilter.config}"
               default="checkstyle-suppressions.xml" />
     <property name="optional" value="true"/>
-  </module>
-  
-  <module name="FileTabCharacter">
-    <property name="eachLine" value="true"/>
   </module>
   
   <module name="LineLength">
@@ -246,11 +242,6 @@
     <module name="OverloadMethodsDeclarationOrder"/>
     <module name="VariableDeclarationUsageDistance"/>
     
-    <module name="MethodParamPad">
-      <property name="tokens"
-                value="CTOR_DEF, LITERAL_NEW, METHOD_CALL, METHOD_DEF,
-                      SUPER_CTOR_CALL, ENUM_CONSTANT_DEF, RECORD_DEF"/>
-    </module>
     
     <module name="NoWhitespaceBefore">
       <property name="tokens"
@@ -258,14 +249,7 @@
                       LABELED_STAT, METHOD_REF"/>
       <property name="allowLineBreaks" value="true"/>
     </module>
-    
-    <module name="OperatorWrap">
-      <property name="option" value="NL"/>
-      <property name="tokens"
-                value="BAND, BOR, BSR, BXOR, DIV, EQUAL, GE, GT, LAND, LE, LITERAL_INSTANCEOF, LOR,
-                      LT, MINUS, MOD, NOT_EQUAL, PLUS, QUESTION, SL, SR, STAR, METHOD_REF,
-                      TYPE_EXTENSION_AND "/>
-    </module>
+  
     
     <module name="EmptyCatchBlock">
       <property name="exceptionVariableName" value="expected"/>

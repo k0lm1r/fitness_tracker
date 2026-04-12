@@ -1,17 +1,21 @@
 package com.kolmir.fitness_tracker.services;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import com.kolmir.fitness_tracker.models.User;
@@ -24,25 +28,62 @@ class CustomUserDetailsServiceTest {
     private UserRepository userRepository;
 
     @InjectMocks
-    private CustomUserDetailsService userDetailsService;
+    private CustomUserDetailsService customUserDetailsService;
+
+    @AfterEach
+    void clearSecurityContext() {
+        SecurityContextHolder.clearContext();
+    }
 
     @Test
-    void loadUserByUsername_ReturnsUser() {
+    void loadUserByUsernameReturnsUserWhenFound() {
         User user = new User();
-        user.setUsername("john");
+        user.setUsername("kolmir");
 
-        when(userRepository.getUserByUsername("john")).thenReturn(Optional.of(user));
+        when(userRepository.getUserByUsername("kolmir")).thenReturn(Optional.of(user));
 
-        UserDetails result = userDetailsService.loadUserByUsername("john");
+        var result = customUserDetailsService.loadUserByUsername("kolmir");
 
         assertSame(user, result);
     }
 
     @Test
-    void loadUserByUsername_WhenMissing_Throws() {
-        when(userRepository.getUserByUsername("unknown")).thenReturn(Optional.empty());
+    void loadUserByUsernameThrowsWhenMissing() {
+        when(userRepository.getUserByUsername("missing")).thenReturn(Optional.empty());
 
         assertThrows(UsernameNotFoundException.class,
-                () -> userDetailsService.loadUserByUsername("unknown"));
+                () -> customUserDetailsService.loadUserByUsername("missing"));
+    }
+
+    @Test
+    void getCurrentUserIdReturnsIdWhenPrincipalIsUser() {
+        User user = new User();
+        user.setId(77L);
+
+        var authentication = new UsernamePasswordAuthenticationToken(user, null);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        Long result = customUserDetailsService.getCurrentUserId();
+
+        assertEquals(77L, result);
+    }
+
+    @Test
+    void getCurrentUserIdReturnsNullWhenNoAuthentication() {
+        SecurityContextHolder.clearContext();
+
+        Long result = customUserDetailsService.getCurrentUserId();
+
+        assertNull(result);
+    }
+
+    @Test
+    void getCurrentUserIdReturnsNullWhenPrincipalIsNotUser() {
+        var authentication = new UsernamePasswordAuthenticationToken("anonymous", null);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        Long result = customUserDetailsService.getCurrentUserId();
+
+        assertNull(result);
     }
 }

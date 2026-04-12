@@ -2,7 +2,7 @@ package com.kolmir.fitness_tracker.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -13,16 +13,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import com.kolmir.fitness_tracker.dto.JwtResponse;
-import com.kolmir.fitness_tracker.dto.RefreshTokenRequest;
-import com.kolmir.fitness_tracker.dto.UserLoginRequest;
-import com.kolmir.fitness_tracker.dto.UserRegisterRequest;
-import com.kolmir.fitness_tracker.exceptions.EmailAlreadyInUseException;
-import com.kolmir.fitness_tracker.exceptions.JwtNotValidException;
-import com.kolmir.fitness_tracker.exceptions.UsernameAlreadyExistsException;
+import com.kolmir.fitness_tracker.dto.jwt.JwtResponse;
+import com.kolmir.fitness_tracker.dto.jwt.RefreshTokenRequest;
+import com.kolmir.fitness_tracker.dto.user.UserLoginRequest;
+import com.kolmir.fitness_tracker.dto.user.UserRegisterRequest;
+import com.kolmir.fitness_tracker.exceptions.ConflictException;
+import com.kolmir.fitness_tracker.exceptions.UnauthorizedException;
 import com.kolmir.fitness_tracker.mappers.UserMapper;
 import com.kolmir.fitness_tracker.models.User;
 import com.kolmir.fitness_tracker.repository.UserRepository;
@@ -50,109 +48,103 @@ class AuthServiceTest {
     private AuthService authService;
 
     @Test
-    void login_GeneratesTokens() {
+    void loginAuthenticatesAndReturnsTokens() {
         UserLoginRequest request = new UserLoginRequest();
-        request.setUsername("john");
-        request.setPassword("password");
+        request.setUsername("user1");
+        request.setPassword("pass1");
 
-        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
-                .thenReturn((Authentication) null);
-        when(jwtUtils.generateAccessToken("john")).thenReturn("access-token");
-        when(jwtUtils.generateRefreshToken("john")).thenReturn("refresh-token");
+        when(jwtUtils.generateAccessToken("user1")).thenReturn("access");
+        when(jwtUtils.generateRefreshToken("user1")).thenReturn("refresh");
 
-        JwtResponse response = authService.login(request);
+        JwtResponse result = authService.login(request);
 
-        assertEquals("access-token", response.getAccess());
-        assertEquals("refresh-token", response.getRefresh());
+        assertEquals("access", result.getAccess());
+        assertEquals("refresh", result.getRefresh());
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
     }
 
     @Test
-    void refreshToken_WhenValid_ReturnsNewAccessToken() throws JwtNotValidException {
-        RefreshTokenRequest request = new RefreshTokenRequest();
-        request.setRefreshToken("refresh-token");
-
-        when(jwtUtils.validateToken("refresh-token")).thenReturn(true);
-        when(jwtUtils.getUsernameFromToken("refresh-token")).thenReturn("john");
-        when(jwtUtils.generateAccessToken("john")).thenReturn("new-access");
-
-        JwtResponse response = authService.refreshToken(request);
-
-        assertEquals("new-access", response.getAccess());
-        assertEquals("refresh-token", response.getRefresh());
-    }
-
-    @Test
-    void refreshToken_WhenInvalid_Throws() {
+    void refreshTokenThrowsWhenTokenIsInvalid() {
         RefreshTokenRequest request = new RefreshTokenRequest();
         request.setRefreshToken("bad-token");
 
         when(jwtUtils.validateToken("bad-token")).thenReturn(false);
 
-        assertThrows(JwtNotValidException.class, () -> authService.refreshToken(request));
+        assertThrows(UnauthorizedException.class, () -> authService.refreshToken(request));
     }
 
     @Test
-    void register_WhenUsernameExists_Throws() {
-        UserRegisterRequest request = new UserRegisterRequest();
-        request.setUsername("john");
-        request.setPassword("password");
-        request.setEmail("mail@test.com");
+    void refreshTokenReturnsNewAccessTokenWhenValid() {
+        RefreshTokenRequest request = new RefreshTokenRequest();
+        request.setRefreshToken("refresh-token");
 
-        User user = new User();
-        user.setUsername("john");
-        user.setEmail("mail@test.com");
+        when(jwtUtils.validateToken("refresh-token")).thenReturn(true);
+        when(jwtUtils.getUsernameFromToken("refresh-token")).thenReturn("user2");
+        when(jwtUtils.generateAccessToken("user2")).thenReturn("new-access");
 
-        when(userMapper.toEntity(request)).thenReturn(user);
-        when(userRepository.existsByUsername("john")).thenReturn(true);
+        JwtResponse result = authService.refreshToken(request);
 
-        assertThrows(UsernameAlreadyExistsException.class, () -> authService.register(request));
+        assertEquals("new-access", result.getAccess());
+        assertEquals("refresh-token", result.getRefresh());
     }
 
     @Test
-    void register_WhenEmailExists_Throws() {
+    void registerThrowsWhenUsernameExists() {
         UserRegisterRequest request = new UserRegisterRequest();
-        request.setUsername("john");
-        request.setPassword("password");
-        request.setEmail("mail@test.com");
+        request.setUsername("taken");
+        request.setPassword("pass");
 
         User user = new User();
-        user.setUsername("john");
-        user.setEmail("mail@test.com");
+        user.setUsername("taken");
+        user.setEmail("mail@example.com");
 
         when(userMapper.toEntity(request)).thenReturn(user);
-        when(userRepository.existsByUsername("john")).thenReturn(false);
-        when(userRepository.existsByEmail("mail@test.com")).thenReturn(true);
+        when(userRepository.existsByUsername("taken")).thenReturn(true);
 
-        assertThrows(EmailAlreadyInUseException.class, () -> authService.register(request));
+        assertThrows(ConflictException.class, () -> authService.register(request));
     }
 
     @Test
-    void register_WhenSuccessful_ReturnsTokens() throws UsernameAlreadyExistsException, EmailAlreadyInUseException {
+    void registerThrowsWhenEmailExists() {
         UserRegisterRequest request = new UserRegisterRequest();
-        request.setUsername("john");
-        request.setPassword("password");
-        request.setEmail("mail@test.com");
+        request.setUsername("user3");
+        request.setPassword("pass");
 
         User user = new User();
-        user.setUsername("john");
-        user.setEmail("mail@test.com");
-        user.setPassword("password");
+        user.setUsername("user3");
+        user.setEmail("used@example.com");
 
         when(userMapper.toEntity(request)).thenReturn(user);
-        when(userRepository.existsByUsername("john")).thenReturn(false);
-        when(userRepository.existsByEmail("mail@test.com")).thenReturn(false);
-        when(passwordEncoder.encode("password")).thenReturn("encoded");
-        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
-                .thenReturn((Authentication) null);
-        when(jwtUtils.generateAccessToken("john")).thenReturn("access-token");
-        when(jwtUtils.generateRefreshToken("john")).thenReturn("refresh-token");
+        when(userRepository.existsByUsername("user3")).thenReturn(false);
+        when(userRepository.existsByEmail("used@example.com")).thenReturn(true);
 
-        JwtResponse response = authService.register(request);
+        assertThrows(ConflictException.class, () -> authService.register(request));
+    }
 
-        assertEquals("access-token", response.getAccess());
-        assertEquals("refresh-token", response.getRefresh());
+    @Test
+    void registerCreatesUserAndReturnsTokens() {
+        UserRegisterRequest request = new UserRegisterRequest();
+        request.setUsername("user4");
+        request.setPassword("raw-pass");
+
+        User user = new User();
+        user.setUsername("user4");
+        user.setPassword("raw-pass");
+        user.setEmail("user4@example.com");
+
+        when(userMapper.toEntity(request)).thenReturn(user);
+        when(userRepository.existsByUsername("user4")).thenReturn(false);
+        when(userRepository.existsByEmail("user4@example.com")).thenReturn(false);
+        when(passwordEncoder.encode("raw-pass")).thenReturn("encoded-pass");
+        when(jwtUtils.generateAccessToken("user4")).thenReturn("access-4");
+        when(jwtUtils.generateRefreshToken("user4")).thenReturn("refresh-4");
+
+        JwtResponse result = authService.register(request);
+
+        assertEquals("access-4", result.getAccess());
+        assertEquals("refresh-4", result.getRefresh());
+        assertEquals("encoded-pass", user.getPassword());
         verify(userRepository).save(user);
-        assertEquals("encoded", user.getPassword());
+        verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
     }
 }

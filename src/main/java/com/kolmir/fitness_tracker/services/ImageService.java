@@ -6,7 +6,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.kolmir.fitness_tracker.dto.ImageResponce;
+import com.kolmir.fitness_tracker.dto.image.ImageResponce;
+import com.kolmir.fitness_tracker.exceptions.StorageException;
 import com.kolmir.fitness_tracker.mappers.ImageMapper;
 import com.kolmir.fitness_tracker.models.Image;
 import com.kolmir.fitness_tracker.models.User;
@@ -28,7 +29,7 @@ public class ImageService {
     @Value("${minio.bucket}")
     private String bucket;
 
-    public ImageResponce upload(MultipartFile file) throws Exception {
+    public ImageResponce upload(MultipartFile file) {
         Long currentUserId = CurrentUserProvider.getCurrentUserId();
         String filename = LocalDateTime.now() + ".png";
         Image image = new Image();
@@ -39,13 +40,17 @@ public class ImageService {
         image.setPath("media/" + currentUserId + "/" + filename);
         image.setOwner(user);
 
-        minioClient.putObject(
-                    PutObjectArgs.builder()
-                            .bucket(bucket)
-                            .object(filename)
-                            .stream(file.getInputStream(), file.getSize(), -1)
-                            .contentType(file.getContentType())
-                            .build());
+        try {
+            minioClient.putObject(
+                        PutObjectArgs.builder()
+                                .bucket(bucket)
+                                .object(filename)
+                                .stream(file.getInputStream(), file.getSize(), -1)
+                                .contentType(file.getContentType())
+                                .build());
+        } catch (Exception e) {
+            throw new StorageException("не удалось загрузить файл", e);
+        }
 
         return imageMapper.toDTO(imageRepository.save(image));
     }

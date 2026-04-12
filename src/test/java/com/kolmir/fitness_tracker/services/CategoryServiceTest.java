@@ -1,30 +1,30 @@
 package com.kolmir.fitness_tracker.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 
-import com.kolmir.fitness_tracker.dto.CategoryDTO;
-import com.kolmir.fitness_tracker.exceptions.CategoryNotFoundException;
+import com.kolmir.fitness_tracker.dto.category.CategoryDTO;
+import com.kolmir.fitness_tracker.exceptions.NotFoundException;
 import com.kolmir.fitness_tracker.mappers.CategoryMapper;
 import com.kolmir.fitness_tracker.models.Category;
-import com.kolmir.fitness_tracker.models.User;
 import com.kolmir.fitness_tracker.repository.CategoryRepository;
+import com.kolmir.fitness_tracker.repository.UserRepository;
+import com.kolmir.fitness_tracker.security.CurrentUserProvider;
 
 @ExtendWith(MockitoExtension.class)
 class CategoryServiceTest {
@@ -35,113 +35,123 @@ class CategoryServiceTest {
     @Mock
     private CategoryMapper categoryMapper;
 
+    @Mock
+    private ExerciseService exerciseService;
+
+    @Mock
+    private UserRepository userRepository;
+
     @InjectMocks
     private CategoryService categoryService;
 
-    private User authenticatedUser;
-
-    
-    @BeforeEach
-    void setUpAuth() {
-        authenticatedUser = new User();
-        authenticatedUser.setId(77L);
-        SecurityContextHolder.getContext()
-                .setAuthentication(new UsernamePasswordAuthenticationToken(authenticatedUser, null));
-    }
-
-    @AfterEach
-    void clearAuth() {
-        SecurityContextHolder.clearContext();
-    }
-
     @Test
-    void getAll_ReturnsUserCategories() {
+    void getAllReturnsMappedCategoriesForCurrentUser() {
         Category category = new Category();
         CategoryDTO dto = new CategoryDTO();
 
-        when(categoryRepository.findAllByOwnerId(authenticatedUser.getId())).thenReturn(List.of(category));
-        when(categoryMapper.toDTO(category)).thenReturn(dto);
+        try (MockedStatic<CurrentUserProvider> currentUser = mockStatic(CurrentUserProvider.class)) {
+            currentUser.when(CurrentUserProvider::getCurrentUserId).thenReturn(7L);
+            when(categoryRepository.findAllByOwnerId(7L)).thenReturn(List.of(category));
+            when(categoryMapper.toDTO(category)).thenReturn(dto);
 
-        List<CategoryDTO> result = categoryService.getAll();
+            List<CategoryDTO> result = categoryService.getAll();
 
-        assertEquals(1, result.size());
-        assertSame(dto, result.get(0));
-        verify(categoryRepository).findAllByOwnerId(authenticatedUser.getId());
+            assertEquals(1, result.size());
+            assertEquals(dto, result.getFirst());
+        }
     }
 
     @Test
-    void getById_ReturnsCategory() throws CategoryNotFoundException {
+    void getByIdThrowsWhenCategoryMissing() {
+        when(categoryRepository.findById(11L)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> categoryService.getById(11L));
+    }
+
+    @Test
+    void getByIdReturnsMappedCategoryWhenFound() {
         Category category = new Category();
         CategoryDTO dto = new CategoryDTO();
 
-        when(categoryRepository.findById(5L)).thenReturn(Optional.of(category));
+        when(categoryRepository.findById(12L)).thenReturn(Optional.of(category));
         when(categoryMapper.toDTO(category)).thenReturn(dto);
 
-        CategoryDTO result = categoryService.getById(5L);
+        CategoryDTO result = categoryService.getById(12L);
 
-        assertSame(dto, result);
-        verify(categoryRepository).findById(5L);
+        assertEquals(dto, result);
     }
 
     @Test
-    void getById_WhenMissing_Throws() {
-        when(categoryRepository.findById(3L)).thenReturn(Optional.empty());
+    void saveAssignsOwnerAndPersistsCategory() {
+        CategoryDTO request = new CategoryDTO();
+        request.setName("Cardio");
 
-        assertThrows(CategoryNotFoundException.class, () -> categoryService.getById(3L));
-        verify(categoryRepository).findById(3L);
+        Category category = new Category();
+        CategoryDTO response = new CategoryDTO();
+        var owner = new com.kolmir.fitness_tracker.models.User();
+        owner.setId(5L);
+
+        try (MockedStatic<CurrentUserProvider> currentUser = mockStatic(CurrentUserProvider.class)) {
+            currentUser.when(CurrentUserProvider::getCurrentUserId).thenReturn(5L);
+            when(categoryMapper.toEntity(request)).thenReturn(category);
+            when(userRepository.getReferenceById(5L)).thenReturn(owner);
+            when(categoryRepository.save(category)).thenReturn(category);
+            when(categoryMapper.toDTO(category)).thenReturn(response);
+
+            CategoryDTO result = categoryService.save(request);
+
+            assertEquals(response, result);
+            verify(categoryRepository).save(category);
+        }
     }
 
     @Test
-    void save_SetsOwnerFromSecurityContext() {
-        CategoryDTO dto = new CategoryDTO();
-        dto.setName("Test");
+    void updateThrowsWhenCategoryMissing() {
+        CategoryDTO request = new CategoryDTO();
+        when(categoryRepository.existsById(100L)).thenReturn(false);
 
-        Category mappedEntity = new Category();
-        CategoryDTO responseDto = new CategoryDTO();
-
-        when(categoryMapper.toEntity(dto)).thenReturn(mappedEntity);
-        when(categoryRepository.save(mappedEntity)).thenReturn(mappedEntity);
-        when(categoryMapper.toDTO(mappedEntity)).thenReturn(responseDto);
-
-        CategoryDTO result = categoryService.save(dto);
-
-        assertSame(responseDto, result);
-        assertEquals(authenticatedUser.getId(), dto.getOwnerId());
-        verify(categoryRepository).save(mappedEntity);
+        assertThrows(NotFoundException.class, () -> categoryService.update(100L, request));
+        verify(categoryRepository, never()).save(any(Category.class));
     }
 
     @Test
-    void update_SetsIdAndPersists() throws CategoryNotFoundException {
-        CategoryDTO dto = new CategoryDTO();
-        Category entity = new Category();
-        CategoryDTO updatedDto = new CategoryDTO();
+    void updateSavesMappedCategoryWhenExists() {
+        CategoryDTO request = new CategoryDTO();
+        Category category = new Category();
+        CategoryDTO response = new CategoryDTO();
+        var owner = new com.kolmir.fitness_tracker.models.User();
+        owner.setId(13L);
 
-        when(categoryMapper.toEntity(dto)).thenReturn(entity);
+        try (MockedStatic<CurrentUserProvider> currentUser = mockStatic(CurrentUserProvider.class)) {
+            currentUser.when(CurrentUserProvider::getCurrentUserId).thenReturn(13L);
+            when(categoryMapper.toEntity(request)).thenReturn(category);
+            when(categoryRepository.existsById(13L)).thenReturn(true);
+            when(userRepository.getReferenceById(13L)).thenReturn(owner);
+            when(categoryRepository.save(category)).thenReturn(category);
+            when(categoryMapper.toDTO(category)).thenReturn(response);
+
+            CategoryDTO result = categoryService.update(13L, request);
+
+            assertEquals(13L, category.getId());
+            assertEquals(response, result);
+        }
+    }
+
+    @Test
+    void deleteThrowsWhenCategoryMissing() {
+        when(categoryRepository.existsById(88L)).thenReturn(false);
+
+        assertThrows(NotFoundException.class, () -> categoryService.delete(88L));
+        verify(categoryRepository, never()).deleteById(88L);
+    }
+
+    @Test
+    void deleteInvalidatesExerciseCacheAndRemovesCategory() {
         when(categoryRepository.existsById(9L)).thenReturn(true);
-        when(categoryRepository.save(entity)).thenReturn(entity);
-        when(categoryMapper.toDTO(entity)).thenReturn(updatedDto);
 
-        CategoryDTO result = categoryService.update(9L, dto);
+        categoryService.delete(9L);
 
-        assertSame(updatedDto, result);
-        assertEquals(9L, entity.getId());
-        verify(categoryRepository).existsById(9L);
-    }
-
-    @Test
-    void delete_WhenMissing_Throws() {
-        when(categoryRepository.existsById(99L)).thenReturn(false);
-
-        assertThrows(CategoryNotFoundException.class, () -> categoryService.delete(99L));
-        verify(categoryRepository).existsById(99L);
-    }
-
-    @Test
-    void delete_WhenExists_Deletes() throws CategoryNotFoundException {
-        when(categoryRepository.existsById(10L)).thenReturn(true);
-
-        categoryService.delete(10L);
-
-        verify(categoryRepository).deleteById(10L);
+        verify(exerciseService).invalidateCache();
+        verify(categoryRepository).deleteById(9L);
     }
 }
