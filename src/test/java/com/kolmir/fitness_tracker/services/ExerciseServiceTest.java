@@ -7,15 +7,18 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.lenient;
 
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -44,8 +47,16 @@ class ExerciseServiceTest {
     @Mock
     private ExerciseCache cache;
 
+    @Mock
+    private ApplicationContext applicationContext;
+
     @InjectMocks
     private ExerciseService exerciseService;
+
+    @BeforeEach
+    void setUp() {
+        lenient().when(applicationContext.getBean(ExerciseService.class)).thenReturn(exerciseService);
+    }
 
     @Test
     void getAllByOwnerIdReturnsCachedPageWhenCacheHit() {

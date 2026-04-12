@@ -34,7 +34,7 @@ public class LoggingAspect {
         Object result = null;
         try {
             result = joinPoint.proceed();
-        } catch(Throwable t) {
+        } catch (Throwable t) {
             logger.error("-> {} exception={}", methodName, t);
             throw t;
         }

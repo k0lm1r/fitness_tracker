@@ -152,10 +152,6 @@ public class ExerciseService {
         state.markRunning();
         
         try {
-            Thread.sleep(20000, 0);
-        } catch (InterruptedException e) {
-        }
-        try {
             List<ExerciseResponse> responses = saveAllWithoutTransactional(requests);
 
             state.markCompleted(responses.size());
