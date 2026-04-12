@@ -72,3 +72,48 @@ Windows:
    <code>mvnw.cmd spring-boot:run</code>
 3. По умолчанию приложение слушает порт `8080`, 
 БД — <code>jdbc:postgresql://localhost:5432/fitness_tracker</code>
+
+## CI/CD (GitHub Actions)
+
+Добавлены workflow:
+
+1. `CI` - `.github/workflows/ci.yml`
+   Выполняется на каждый `push` и `pull_request`:
+   - установка Java 25
+   - `./mvnw verify` (тесты, checkstyle, jacoco rules)
+   - сохранение test/jacoco артефактов
+
+2. `CD` - `.github/workflows/cd.yml`
+   Выполняется на `push` в ветку `main` и вручную (`workflow_dispatch`):
+   - сборка Docker-образов backend/frontend
+   - публикация в `ghcr.io`
+   - опциональный деплой по SSH на сервер
+
+### Что нужно настроить в GitHub Secrets
+
+Для публикации образов в GHCR дополнительных секретов не нужно (используется `GITHUB_TOKEN`).
+
+Для деплоя на сервер нужны secrets:
+
+- `DEPLOY_HOST` - адрес сервера
+- `DEPLOY_PORT` - SSH порт (обычно `22`)
+- `DEPLOY_USER` - SSH пользователь
+- `DEPLOY_SSH_KEY` - приватный SSH ключ
+- `DEPLOY_PATH` - путь на сервере, где лежит `docker-compose.prod.yml`
+- `GHCR_USERNAME` - пользователь для чтения GHCR на сервере
+- `GHCR_READ_TOKEN` - токен с правом `read:packages`
+
+Если secrets деплоя не заданы, job `deploy` автоматически пропускается.
+
+### Деплой на сервер
+
+На сервере в `DEPLOY_PATH` должны быть:
+
+- `docker-compose.prod.yml`
+- `.env` (POSTGRES/MINIO переменные)
+- `init.sql` (если нужен первичный init БД)
+
+Workflow выставляет `IMAGE_NAMESPACE` автоматически из owner репозитория и запускает:
+
+- `docker compose -f docker-compose.prod.yml pull`
+- `docker compose -f docker-compose.prod.yml up -d --remove-orphans`
