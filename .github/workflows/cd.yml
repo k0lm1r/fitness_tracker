@@ -19,6 +19,14 @@ env:
   DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
   GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
   GHCR_READ_TOKEN: ${{ secrets.GHCR_READ_TOKEN }}
+  POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+  POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+  MINIO_ROOT_USER: ${{ secrets.MINIO_ROOT_USER }}
+  MINIO_ACCESS_KEY: ${{ secrets.MINIO_ACCESS_KEY }}
+  MINIO_SECRET_KEY: ${{ secrets.MINIO_SECRET_KEY }}
+  JWT_SECRET: ${{ secrets.JWT_SECRET }}
+  JWT_ACCESS_TOKEN_EXPIRATION: ${{ secrets.JWT_ACCESS_TOKEN_EXPIRATION }}
+  JWT_REFRESH_TOKEN_EXPIRATION: ${{ secrets.JWT_REFRESH_TOKEN_EXPIRATION }}
 
 jobs:
   build-and-push:
@@ -91,7 +99,7 @@ jobs:
         shell: bash
         run: |
           missing=0
-          for v in DEPLOY_HOST DEPLOY_USER DEPLOY_SSH_KEY DEPLOY_PATH GHCR_USERNAME GHCR_READ_TOKEN; do
+          for v in DEPLOY_HOST DEPLOY_USER DEPLOY_SSH_KEY DEPLOY_PATH GHCR_USERNAME GHCR_READ_TOKEN POSTGRES_USER POSTGRES_PASSWORD MINIO_ROOT_USER MINIO_ACCESS_KEY MINIO_SECRET_KEY JWT_SECRET JWT_ACCESS_TOKEN_EXPIRATION JWT_REFRESH_TOKEN_EXPIRATION; do
             if [ -z "${!v}" ]; then
               echo "Missing required variable: $v"
               missing=1
@@ -118,6 +126,19 @@ jobs:
             cd "${{ env.DEPLOY_PATH }}"
             export IMAGE_NAMESPACE="${{ needs.build-and-push.outputs.image_namespace }}"
             export IMAGE_REGISTRY="ghcr.io"
+            cat > .env <<'EOF'
+            POSTGRES_USER=${{ env.POSTGRES_USER }}
+            POSTGRES_PASSWORD=${{ env.POSTGRES_PASSWORD }}
+            MINIO_ROOT_USER=${{ env.MINIO_ROOT_USER }}
+            MINIO_ACCESS_KEY=${{ env.MINIO_ACCESS_KEY }}
+            MINIO_SECRET_KEY=${{ env.MINIO_SECRET_KEY }}
+            JWT_SECRET=${{ env.JWT_SECRET }}
+            JWT_ACCESS_TOKEN_EXPIRATION=${{ env.JWT_ACCESS_TOKEN_EXPIRATION }}
+            JWT_REFRESH_TOKEN_EXPIRATION=${{ env.JWT_REFRESH_TOKEN_EXPIRATION }}
+            IMAGE_NAMESPACE=${{ needs.build-and-push.outputs.image_namespace }}
+            IMAGE_REGISTRY=ghcr.io
+            EOF
+            chmod 600 .env
             echo "${{ env.GHCR_READ_TOKEN }}" | docker login ghcr.io -u "${{ env.GHCR_USERNAME }}" --password-stdin
             docker compose -f docker-compose.prod.yml pull
             docker compose -f docker-compose.prod.yml up -d --remove-orphans
