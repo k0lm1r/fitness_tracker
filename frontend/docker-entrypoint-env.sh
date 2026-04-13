@@ -1,7 +1,9 @@
 #!/bin/sh
 set -eu
 
-envsubst '$BACKEND_URL' \
+: "${PORT:=80}"
+
+envsubst '$PORT $BACKEND_URL' \
   < /etc/nginx/templates/default.conf.template \
   > /etc/nginx/conf.d/default.conf
 
