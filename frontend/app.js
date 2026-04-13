@@ -1,5 +1,5 @@
 const APP_CONFIG = window.__APP_CONFIG__ || {};
-const API_BASE = APP_CONFIG.FRONTEND_API_BASE_URL || APP_CONFIG.BACKEND_URL || "/api";
+const API_BASE = APP_CONFIG.FRONTEND_API_BASE_URL || "/api";
 const TOKEN_KEY = "fitness_access_token";
 const REFRESH_KEY = "fitness_refresh_token";
 const NOTICE_TIMEOUT_MS = 3500;
