@@ -117,3 +117,35 @@ Workflow выставляет `IMAGE_NAMESPACE` автоматически из 
 
 - `docker compose -f docker-compose.prod.yml pull`
 - `docker compose -f docker-compose.prod.yml up -d --remove-orphans`
+
+### Переменные в `.env`
+
+Все переменные из `docker-compose.yml` вынесены в `.env`:
+
+- `POSTGRES_DB`
+- `POSTGRES_USER`
+- `POSTGRES_PASSWORD`
+- `SPRING_DATASOURCE_URL`
+- `SPRING_JPA_HIBERNATE_DDL_AUTO`
+- `MINIO_URL`
+- `MINIO_BUCKET`
+- `MINIO_ROOT_USER`
+- `MINIO_ROOT_PASSWORD`
+- `MINIO_ACCESS_KEY`
+- `MINIO_SECRET_KEY`
+- `JWT_SECRET`
+- `JWT_ACCESS_TOKEN_EXPIRATION`
+- `JWT_REFRESH_TOKEN_EXPIRATION`
+- `BACKEND_HOST`
+- `BACKEND_PORT`
+
+### Где взять значения для переменных деплоя (не из `.env`)
+
+Эти значения задаются в `GitHub -> Settings -> Secrets and variables -> Actions -> Repository secrets`:
+
+- `DEPLOY_HOST`: IP/домен сервера (из панели хостинга/VPS или команды `hostname -I` на сервере)
+- `DEPLOY_USER`: SSH-пользователь на сервере (`ubuntu`, `root`, `deploy` и т.п.)
+- `DEPLOY_SSH_KEY`: приватный ключ от пары, чья публичная часть добавлена на сервер в `~/.ssh/authorized_keys`
+- `DEPLOY_PATH`: абсолютный путь на сервере с compose-файлами, например `/opt/fitness-tracker`
+- `GHCR_USERNAME`: GitHub username или имя организации-владельца образов в `ghcr.io`
+- `GHCR_READ_TOKEN`: GitHub Personal Access Token с правом `read:packages`
